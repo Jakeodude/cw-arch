@@ -1,6 +1,6 @@
 # worlds/content_warning/locations.py
 
-from . import options  # optional, if you want to reference options later
+from .Sample import options  # optional, if you want to reference options later
 
 # Base ID - choose a high unique number so it doesn't conflict with other worlds
 base_id = 98765000
