@@ -1,90 +1,114 @@
 # worlds/content_warning/items.py
 
+from itertools import groupby
+from typing import Dict, List, Optional, Set, NamedTuple
 from BaseClasses import Item, ItemClassification
 
-class ContentWarningItem(Item):
-    game = "Content Warning"
+from .names import item_names as iname
 
-# Base ID - must match the one in locations.py (or be consistent across files)
-base_id = 98765000
+
+class ContentWarningItem(Item):
+    game: str = "Content Warning"
+
+
+item_base_id: int = 98765000
+
+
+class CWItemData(NamedTuple):
+    classification: ItemClassification
+    quantity_in_item_pool: int
+    item_id_offset: Optional[int]
+    item_group: str = ""
+
 
 # ==================== ITEM TABLE ====================
-# Keys are the exact item names that will appear in the randomizer / client
-item_table = {
-    # ------------------- Progression / Useful Items -------------------
-    "Camera Upgrade": base_id + 0,          # Better recording time / quality
-    "Advanced Camera": base_id + 1,         # Night vision + longer record
-    "Parabolic Mic": base_id + 2,           # Better monster audio capture
-    "Rescue Hook": base_id + 3,             # Pulling tool for rescues
-    "Shock Stick": base_id + 4,             # Stun tool (safety + comedy)
-    "Goo Ball Pack": base_id + 5,           # Traps for monsters
-    "Defibrillator": base_id + 6,           # Revive tool
+# quantity_in_item_pool sets the *base* count; create_items() adds filler to fill remaining slots.
+item_table: Dict[str, CWItemData] = {
 
-    # Health & Oxygen Progression
-    "Increased Health": base_id + 20,       # +Health pool
-    "Health Upgrade": base_id + 21,
-    "Increased Oxygen": base_id + 22,       # Larger oxygen tank
-    "Oxygen Tank Upgrade": base_id + 23,
-    "Extra Oxygen": base_id + 24,
+    # ---- Camera Equipment (Progression) ----
+    iname.camera_upgrade:  CWItemData(ItemClassification.progression, 1,  0, "Equipment"),
+    iname.advanced_camera: CWItemData(ItemClassification.progression, 1,  1, "Equipment"),
+    iname.parabolic_mic:   CWItemData(ItemClassification.progression, 1,  2, "Equipment"),
+    iname.rescue_hook:     CWItemData(ItemClassification.progression, 1,  3, "Equipment"),
+    iname.shock_stick:     CWItemData(ItemClassification.progression, 1,  4, "Equipment"),
+    iname.goo_ball_pack:   CWItemData(ItemClassification.useful,      2,  5, "Equipment"),
+    iname.defibrillator:   CWItemData(ItemClassification.progression, 1,  6, "Equipment"),
 
-    # Money ($ in-game currency) - helps buy store items faster
-    "Money Boost": base_id + 40,
-    "Big Money Boost": base_id + 41,
-    "Extra Cash": base_id + 42,
-    "$500": base_id + 43,
-    "$2000": base_id + 44,
+    # ---- Health & Oxygen (Progression / Useful) ----
+    iname.increased_health:    CWItemData(ItemClassification.progression, 2, 10, "Health"),
+    iname.health_upgrade:      CWItemData(ItemClassification.useful,      2, 11, "Health"),
+    iname.increased_oxygen:    CWItemData(ItemClassification.progression, 2, 12, "Oxygen"),
+    iname.oxygen_tank_upgrade: CWItemData(ItemClassification.useful,      2, 13, "Oxygen"),
+    iname.extra_oxygen:        CWItemData(ItemClassification.filler,      2, 14, "Oxygen"),
 
-    # Meta Coins (permanent currency) - unlocks hats & island upgrades
-    "Meta Coin": base_id + 60,
-    "Meta Coin Pack": base_id + 61,
-    "Big Meta Coin Pack": base_id + 62,
+    # ---- Money (Useful / Filler) ----
+    iname.money_boost:     CWItemData(ItemClassification.useful,  3, 20, "Money"),
+    iname.big_money_boost: CWItemData(ItemClassification.useful,  2, 21, "Money"),
+    iname.extra_cash:      CWItemData(ItemClassification.filler,  3, 22, "Money"),
+    iname.cash_500:        CWItemData(ItemClassification.filler,  2, 23, "Money"),
+    iname.cash_2000:       CWItemData(ItemClassification.useful,  2, 24, "Money"),
 
-    # View / Content Boosts (helps hit view milestones & quotas)
-    "View Boost": base_id + 80,
-    "Big View Boost": base_id + 81,
-    "Viral Moment": base_id + 82,
+    # ---- Meta Coins (Filler / Useful) ----
+    iname.meta_coin:          CWItemData(ItemClassification.filler,  3, 30, "Meta Coins"),
+    iname.meta_coin_pack:     CWItemData(ItemClassification.useful,  2, 31, "Meta Coins"),
+    iname.big_meta_coin_pack: CWItemData(ItemClassification.useful,  1, 32, "Meta Coins"),
 
-    # ------------------- Filler / Trap Items -------------------
-    "Nothing": base_id + 100,               # True junk
-    "Extra Views": base_id + 101,
-    "Small Cash": base_id + 102,
-    "Minor Health Pack": base_id + 103,
-    "Minor Oxygen": base_id + 104,
-    "Monster Repellent": base_id + 105,     # Temporary safety
+    # ---- View Boosts (Progression — gates view milestone checks) ----
+    iname.view_boost:     CWItemData(ItemClassification.progression, 4, 40, "Views"),
+    iname.big_view_boost: CWItemData(ItemClassification.progression, 2, 41, "Views"),
+    iname.viral_moment:   CWItemData(ItemClassification.useful,      2, 42, "Views"),
 
-    # Traps (fun chaos)
-    "Camera Malfunction": base_id + 120,
-    "Monster Swarm": base_id + 121,
-    "Oxygen Leak": base_id + 122,
-    "Low Battery": base_id + 123,
+    # ---- Filler ----
+    iname.nothing:           CWItemData(ItemClassification.filler, 2, 50, "Filler"),
+    iname.extra_views:       CWItemData(ItemClassification.filler, 2, 51, "Filler"),
+    iname.small_cash:        CWItemData(ItemClassification.filler, 2, 52, "Filler"),
+    iname.minor_health_pack: CWItemData(ItemClassification.filler, 2, 53, "Filler"),
+    iname.minor_oxygen:      CWItemData(ItemClassification.filler, 2, 54, "Filler"),
+    iname.monster_repellent: CWItemData(ItemClassification.filler, 2, 55, "Filler"),
 
-    # ------------------- Victory Item -------------------
-    "Viral Sensation": base_id + 200,       # Goal item - reach high views / film everything
+    # ---- Traps ----
+    iname.camera_malfunction: CWItemData(ItemClassification.trap, 2, 60, "Traps"),
+    iname.monster_swarm:      CWItemData(ItemClassification.trap, 1, 61, "Traps"),
+    iname.oxygen_leak:        CWItemData(ItemClassification.trap, 1, 62, "Traps"),
+    iname.low_battery:        CWItemData(ItemClassification.trap, 1, 63, "Traps"),
+
+    # ---- Victory Event (no ID — placed as event) ----
+    iname.viral_sensation: CWItemData(ItemClassification.progression, 0, None, "Event"),
 }
 
-# Classification helper (used in create_item)
-def get_item_classification(name: str) -> ItemClassification:
-    if name in {"Camera Upgrade", "Advanced Camera", "Parabolic Mic", "Rescue Hook",
-                "Shock Stick", "Defibrillator", "Increased Health", "Health Upgrade",
-                "Increased Oxygen", "Oxygen Tank Upgrade", "Viral Sensation"}:
-        return ItemClassification.progression
-    elif name in {"Money Boost", "Big Money Boost", "$2000", "Meta Coin Pack",
-                  "Big Meta Coin Pack", "View Boost", "Big View Boost", "Viral Moment"}:
-        return ItemClassification.progression_skip_balancing  # useful but not strictly required
-    elif "Trap" in name or name in {"Camera Malfunction", "Monster Swarm", "Oxygen Leak", "Low Battery"}:
-        return ItemClassification.trap
+# ==================== COMPUTED LOOKUPS ====================
+item_name_to_id: Dict[str, Optional[int]] = {}
+
+for _name, _data in item_table.items():
+    if _data.item_id_offset is not None:
+        item_name_to_id[_name] = item_base_id + _data.item_id_offset
     else:
-        return ItemClassification.filler
+        item_name_to_id[_name] = None
 
 
-# Optional: Item groups for logic / hints
-item_name_groups = {
-    "Progression": {"Camera Upgrade", "Advanced Camera", "Parabolic Mic", "Rescue Hook",
-                    "Shock Stick", "Defibrillator", "Increased Health", "Increased Oxygen"},
-    "Money": {"Money Boost", "Big Money Boost", "Extra Cash", "$500", "$2000"},
-    "Meta Coins": {"Meta Coin", "Meta Coin Pack", "Big Meta Coin Pack"},
-    "Health": {"Increased Health", "Health Upgrade", "Minor Health Pack"},
-    "Oxygen": {"Increased Oxygen", "Oxygen Tank Upgrade", "Extra Oxygen", "Minor Oxygen"},
-    "Views": {"View Boost", "Big View Boost", "Viral Moment"},
-    "Traps": {"Camera Malfunction", "Monster Swarm", "Oxygen Leak", "Low Battery"},
+def _get_item_group(item_name: str) -> str:
+    return item_table[item_name].item_group
+
+
+filler_items: List[str] = [
+    name for name, data in item_table.items()
+    if data.classification == ItemClassification.filler
+]
+
+trap_items: List[str] = [
+    name for name, data in item_table.items()
+    if data.classification == ItemClassification.trap
+]
+
+event_items: List[str] = [
+    name for name, data in item_table.items()
+    if data.item_group == "Event"
+]
+
+item_name_groups: Dict[str, Set[str]] = {
+    group: set(names)
+    for group, names in groupby(
+        sorted(item_table, key=_get_item_group), _get_item_group
+    )
+    if group != ""
 }
