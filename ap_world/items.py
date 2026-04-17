@@ -43,8 +43,8 @@ item_table: Dict[str, CWItemData] = {
     iname.diving_bell_charger: CWItemData(ItemClassification.useful, 1, 3, "Diving Bell"),
 
     # ---- Progressive Views (Progression — mid/late game) ----
-    # 10 copies; each multiplies view income by 1.1×
-    iname.prog_views: CWItemData(ItemClassification.progression, 10, 4, "Views"),
+    # 12 copies; each multiplies view income by 1.1×
+    iname.prog_views: CWItemData(ItemClassification.progression, 12, 4, "Views"),
 
     # ---- Rescue / Safety Gear (Progression) ----
     iname.rescue_hook:   CWItemData(ItemClassification.progression, 1, 10, "Safety"),
