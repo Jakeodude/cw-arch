@@ -63,7 +63,7 @@ Mime
 Streamer
 
 
-Make an option for these monsters only to have filler items behind their checks. Have it say these are difficult monsters that rarely show up or are hard to film without dying.  
+Make an option for these monsters only to have filler items behind their checks. Have it say these are difficult monsters that rarely show up or are hard to film without dying. Otherwise add them to the late game checks.
 Flicker
 Cam Creep
 InfiltratorSpawner
@@ -123,10 +123,67 @@ Add the item Sketch Pad to the store purchase checks list
 Add the party popper to the store purchase checks list
 
 Make these Emotes early game checks.
+Applause
+Workout 1
+Confused
+Dance 103
+Caring
+Ancient Gestures 3
+Ancient Gesture 2
 
 
 Make these Emotes mid game checks.
-
+Dance 102
+Dance 101
+Backflip
+Yoga
+Workout 2
 
 
 Make these Emotes late game checks.
+Gymnastics
+Thumbnail 1
+Thumbnail 2
+Ancient Gestures 1
+
+
+Make the hats early game checks.
+Beanie
+Bucket Hat
+Floppy Hat
+Hamburg
+Bowler Hat
+Cap
+Newsboy Cap
+Sports Helmet
+Hard Hat
+
+
+Make these hats mid game checks.
+Chef's Hat
+Propeller Hat
+Cowboy Hat
+Horns
+Hotdog Hat
+Milk Hat
+Pirate Hat
+Top Hat
+Party Hat
+Ushanka
+
+
+Make these hats late game checks.
+Baclava
+Cat Ears
+Curly Hair
+Clown Hair
+Crown
+Halo
+Jesters Hat
+Ghost Hat
+Savannah Hair
+Tooop Hat
+Shroom Hat
+Witch Hat
+
+Make it so that there are 3 checks for accepting a sponsorship. Add an option for extra checks to be added for completing each of the sponsorship difficulties. The difficulties are EASY/MEDIUM/HARD/VERY HARD. Call the option Sponsorsanity.
