@@ -33,26 +33,6 @@ def can_explore_late_dungeon(state: CollectionState, player: int) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Safety Gear
-# ---------------------------------------------------------------------------
-
-def has_safety_gear(state: CollectionState, player: int) -> bool:
-    """Player has at least one piece of survival / safety equipment."""
-    return state.has_any(
-        {iname.shock_stick, iname.rescue_hook, iname.defibrillator},
-        player,
-    )
-
-
-def can_survive_dungeon(state: CollectionState, player: int) -> bool:
-    """Full survival kit: safety gear AND enough oxygen for dangerous encounters."""
-    return (
-        has_safety_gear(state, player)
-        and state.count(iname.prog_oxygen, player) >= 3
-    )
-
-
-# ---------------------------------------------------------------------------
 # Progressive Views (gates view milestone checks)
 # ---------------------------------------------------------------------------
 

@@ -105,12 +105,13 @@ location_table: Dict[str, CWLocationData] = {
     # Late game monsters
     "Filmed Snatcho":       CWLocationData(rname.dungeon, 310, "Monsters", "late"),
     "Filmed Jelly":         CWLocationData(rname.dungeon, 314, "Monsters", "late"),
-    "Filmed Weeping":       CWLocationData(rname.dungeon, 315, "Monsters", "late"),  # Iron Maiden is Wheeping
     "Filmed Fire":          CWLocationData(rname.dungeon, 319, "Monsters", "late"),
     "Filmed Mime":          CWLocationData(rname.dungeon, 324, "Monsters", "late"),
     "Filmed Streamer":      CWLocationData(rname.dungeon, 328, "Monsters", "late"),
 
     # Difficult monsters — filler by default; DifficultMonsters option can enable real items
+    # Weeping is also multiplayer-only (see rules.py and MultiplayerMode option).
+    "Filmed Weeping":       CWLocationData(rname.dungeon, 315, "Monsters", "difficult"),  # Iron Maiden / Wheeping
     "Filmed Flicker":       CWLocationData(rname.dungeon, 304, "Monsters", "difficult"),
     "Filmed Cam Creep":     CWLocationData(rname.dungeon, 305, "Monsters", "difficult"),
     "Filmed Infiltrator":   CWLocationData(rname.dungeon, 306, "Monsters", "difficult"),

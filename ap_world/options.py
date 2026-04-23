@@ -136,6 +136,15 @@ class DifficultMonsters(Toggle):
     display_name = "Difficult Monsters Have Real Items"
 
 
+class MultiplayerMode(Toggle):
+    """Enable if this game is being played in multiplayer (more than one player).
+    When enabled, multiplayer-only monster locations (Weeping and Worm) become
+    logically accessible and can receive real items.
+    When disabled (default / solo play), those locations are excluded and
+    always contain filler rewards."""
+    display_name = "Multiplayer Mode"
+
+
 # ===========================================================================
 # OPTIONS DATACLASS
 # ===========================================================================
@@ -159,3 +168,4 @@ class ContentWarningGameOptions(PerGameCommonOptions):
     include_sponsorships:   IncludeSponsorship
     sponsorsanity:          Sponsorsanity
     difficult_monsters:     DifficultMonsters
+    multiplayer_mode:       MultiplayerMode

@@ -7,6 +7,7 @@ from BaseClasses import Region, ItemClassification, LocationProgressType
 from .items import (
     item_table, item_name_to_id, item_name_groups,
     filler_items, trap_items,
+    MONEY_FILLER_POOL,
     ContentWarningItem, CWItemData,
 )
 from .locations import (
@@ -29,6 +30,13 @@ _HIGH_VIEW_MILESTONES = {
     lname.reached_645k,
     lname.reached_850k,
     lname.reached_1m,
+}
+
+# Monster locations that require Multiplayer Mode (player_count > 1).
+# These are marked EXCLUDED in solo seeds and gated by an access rule in rules.py.
+_MULTIPLAYER_ONLY_MONSTERS = {
+    "Filmed Weeping",
+    "Filmed Worm",
 }
 
 
@@ -125,6 +133,9 @@ class ContentWarningWorld(World):
         self.location_total = self._compute_location_total()
 
         # All named (non-event) items go in the pool at their base quantities.
+        # Money items have quantity_in_item_pool == 0 and are filled via the
+        # weighted filler step below.  Meta coin base quantities are set in
+        # items.py to target the early/mid/late budget split.
         items_to_create: Dict[str, int] = {
             name: data.quantity_in_item_pool
             for name, data in item_table.items()
@@ -134,9 +145,10 @@ class ContentWarningWorld(World):
         named_total: int = sum(items_to_create.values())
         total_filler = max(0, self.location_total - named_total)
 
-        # Pad with random filler (money / meta coins — no items per design).
+        # Remaining slots are filled with weighted money filler.
+        # Common: $100 / $200 (3× weight each); Rare: $300 / $400 (1× each).
         for _ in range(total_filler):
-            cw_items.append(self.create_item(self.random.choice(filler_items)))
+            cw_items.append(self.create_item(self.random.choice(MONEY_FILLER_POOL)))
 
         # Add all named items.
         for name, quantity in items_to_create.items():
@@ -144,6 +156,16 @@ class ContentWarningWorld(World):
                 cw_items.append(self.create_item(name))
 
         self.multiworld.itempool += cw_items
+
+        # -----------------------------------------------------------------------
+        # Progression balancing for Meta Coins
+        # Push small packages (500 / 1,000) into sphere-1 locations so the
+        # early-game budget (~5,000 MC) is accessible before mid/late items
+        # unlock.  AP will honour these hints during its fill phase.
+        # -----------------------------------------------------------------------
+        early_items = self.multiworld.early_items[self.player]
+        early_items[iname.meta_coins_500]  = 3   # ≤ 4 in pool → push 3 early
+        early_items[iname.meta_coins_1000] = 2   # ≤ 3 in pool → push 2 early
 
     # -----------------------------------------------------------------------
     # Regions & Locations
@@ -208,6 +230,9 @@ class ContentWarningWorld(World):
                 # When quota goal is low, high-view milestones are unachievable
                 # in a short run — only filler is placed there.
                 loc.progress_type = LocationProgressType.EXCLUDED
+            elif loc_name in _MULTIPLAYER_ONLY_MONSTERS and not options.multiplayer_mode.value:
+                # Solo play: multiplayer-only monster checks always get filler.
+                loc.progress_type = LocationProgressType.EXCLUDED
 
             region.locations.append(loc)
 
@@ -255,4 +280,5 @@ class ContentWarningWorld(World):
             "include_sponsorships":         bool(options.include_sponsorships.value),
             "sponsorsanity":                bool(options.sponsorsanity.value),
             "difficult_monsters":           bool(options.difficult_monsters.value),
+            "multiplayer_mode":             bool(options.multiplayer_mode.value),
         }

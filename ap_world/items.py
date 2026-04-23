@@ -46,24 +46,27 @@ item_table: Dict[str, CWItemData] = {
     # 12 copies; each multiplies view income by 1.1×
     iname.prog_views: CWItemData(ItemClassification.progression, 12, 4, "Views"),
 
-    # ---- Rescue / Safety Gear (Progression) ----
-    iname.rescue_hook:   CWItemData(ItemClassification.progression, 1, 10, "Safety"),
-    iname.shock_stick:   CWItemData(ItemClassification.progression, 1, 11, "Safety"),
-    iname.defibrillator: CWItemData(ItemClassification.progression, 1, 12, "Safety"),
-
     # ---- Money — filler ----
-    # Small = $200, Medium = $400, Large = $600
-    iname.money_small:  CWItemData(ItemClassification.filler, 3, 20, "Money"),
-    iname.money_medium: CWItemData(ItemClassification.filler, 3, 21, "Money"),
-    iname.money_large:  CWItemData(ItemClassification.filler, 2, 22, "Money"),
+    # Common: $100, $200  |  Rare: $300, $400
+    # Base quantity is 0 — money is generated entirely via weighted random filler.
+    iname.money_100: CWItemData(ItemClassification.filler, 0, 20, "Money"),
+    iname.money_200: CWItemData(ItemClassification.filler, 0, 21, "Money"),
+    iname.money_300: CWItemData(ItemClassification.filler, 0, 22, "Money"),
+    iname.money_400: CWItemData(ItemClassification.filler, 0, 23, "Money"),
 
     # ---- Meta Coins — filler ----
-    # Small = 1,000, Medium = 2,000, Large = 3,000
-    # Design target: ≥40,000 total across a world (≥10k early, ≥20k mid, ≥10k late).
-    # Base counts below total ~42,000 meta coins.
-    iname.meta_coins_small:  CWItemData(ItemClassification.filler,  5, 30, "Meta Coins"),
-    iname.meta_coins_medium: CWItemData(ItemClassification.filler,  8, 31, "Meta Coins"),
-    iname.meta_coins_large:  CWItemData(ItemClassification.filler,  7, 32, "Meta Coins"),
+    # Four tiers; base quantities target ~40,000 MC total across a world.
+    #
+    # Early (~5,000):  4×500  + 3×1,000 = 5,000
+    # Mid  (~15,000):  10×1,500          = 15,000
+    # Late (~20,000):  10×2,000          = 20,000  (2,000 packages are rare)
+    #
+    # AP's early_items mechanism pushes 500/1,000 packages into sphere-1
+    # locations to enforce the early distribution (see __init__.py).
+    iname.meta_coins_500:  CWItemData(ItemClassification.filler,  4, 30, "Meta Coins"),
+    iname.meta_coins_1000: CWItemData(ItemClassification.filler,  3, 31, "Meta Coins"),
+    iname.meta_coins_1500: CWItemData(ItemClassification.filler, 10, 32, "Meta Coins"),
+    iname.meta_coins_2000: CWItemData(ItemClassification.filler, 10, 33, "Meta Coins"),
 
     # ---- Traps ----
     # Monster Spawn: spawns a random monster from the trap list (not on Sky Island).
@@ -111,6 +114,28 @@ item_name_groups: Dict[str, Set[str]] = {
     )
     if group != ""
 }
+
+# ---------------------------------------------------------------------------
+# Weighted filler pools
+# ---------------------------------------------------------------------------
+
+# Money — common ($100/$200) appear 3× as often as rare ($300/$400).
+# Using a flat population list so self.random.choice() gives natural weights.
+MONEY_FILLER_POOL: List[str] = (
+    [iname.money_100] * 3 +
+    [iname.money_200] * 3 +
+    [iname.money_300] * 1 +
+    [iname.money_400] * 1
+)
+
+# Meta Coins — additional random filler beyond the base pool quantities.
+# 500/1,000 are common; 1,500 is mid-weight; 2,000 is rare.
+META_COIN_FILLER_POOL: List[str] = (
+    [iname.meta_coins_500]  * 4 +
+    [iname.meta_coins_1000] * 4 +
+    [iname.meta_coins_1500] * 2 +
+    [iname.meta_coins_2000] * 1
+)
 
 # ==================== MONSTER SPAWN TRAP POOL ====================
 # Monsters that can be spawned by the Monster Spawn Trap.

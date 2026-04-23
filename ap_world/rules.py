@@ -203,6 +203,24 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
             )
 
     # -----------------------------------------------------------------------
+    # Multiplayer-only monster rules
+    # "Filmed Weeping" and "Filmed Worm" require Multiplayer Mode to be on.
+    # When Multiplayer Mode is off these locations are already marked EXCLUDED
+    # in create_regions; the rule here enforces the logic constraint so AP
+    # never treats them as reachable in solo seeds.
+    # -----------------------------------------------------------------------
+    # Both locations are always present in the multiworld (difficult/mid stage
+    # locations are added but marked EXCLUDED; they are never removed entirely).
+    _MULTIPLAYER_ONLY: set = {"Filmed Weeping", "Filmed Worm"}
+    multiplayer_on = bool(options.multiplayer_mode.value)
+
+    for mp_loc in _MULTIPLAYER_ONLY:
+        add_rule(
+            multiworld.get_location(mp_loc, player),
+            lambda state, mp=multiplayer_on: mp,
+        )
+
+    # -----------------------------------------------------------------------
     # Quota rules: each quota N requires quota N-1 to be reachable.
     # Only create rules for quotas that are actually in the pool.
     # -----------------------------------------------------------------------

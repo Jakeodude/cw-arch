@@ -13,20 +13,19 @@ diving_bell_charger = "Diving Bell Charger"      # charges items while inside di
 # ---- Progressive Views ----
 prog_views       = "Progressive Views"    # 10 copies: each multiplies video views by 1.1x
 
-# ---- Rescue / Safety ----
-rescue_hook    = "Rescue Hook"
-shock_stick    = "Shock Stick"
-defibrillator  = "Defibrillator"
-
 # ---- Money ($) — filler ----
-money_small  = "$200"
-money_medium = "$400"
-money_large  = "$600"
+# Common: $100, $200  |  Rare: $300, $400
+money_100 = "$100"
+money_200 = "$200"
+money_300 = "$300"
+money_400 = "$400"
 
 # ---- Meta Coins — filler ----
-meta_coins_small  = "1,000 Meta Coins"
-meta_coins_medium = "2,000 Meta Coins"
-meta_coins_large  = "3,000 Meta Coins"
+# Tiers: 500 (early), 1,000 (early/mid), 1,500 (mid), 2,000 (late, rare)
+meta_coins_500  = "500 Meta Coins"
+meta_coins_1000 = "1,000 Meta Coins"
+meta_coins_1500 = "1,500 Meta Coins"
+meta_coins_2000 = "2,000 Meta Coins"
 
 # ---- Traps ----
 monster_spawn = "Monster Spawn Trap"   # spawns a random monster (not on Sky Island)
