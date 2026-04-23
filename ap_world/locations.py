@@ -121,6 +121,62 @@ location_table: Dict[str, CWLocationData] = {
     "Filmed Big Slap":      CWLocationData(rname.dungeon, 327, "Monsters", "difficult"),
     "Filmed Ultra Knifo":   CWLocationData(rname.dungeon, 329, "Monsters", "difficult"),
 
+    # ==================== TIERED MONSTER FILMING (optional) ====================
+    # Enabled by the MonsterTiers option.
+    # Tier 1 = base checks above (unchanged).
+    # Tier 2 preserves the base monster's game_stage so dungeon-depth rules apply
+    # automatically from the existing stage loop in rules.py.
+    # Tier 3 uses "late" stage — requires best exploration capability for any monster.
+    # Does not include difficult monsters (Flicker, Cam Creep, etc., Weeping).
+    # Worm tiers are included here but are still subject to the MultiplhayerMode rule
+    # applied to the base "Filmed Worm" location in rules.py.
+
+    # ── Tier 2 (offsets 330–350) ─────────────────────────────────────────────
+    "Filmed Slurper 2":         CWLocationData(rname.dungeon, 330, "Monster Tiers", "early"),
+    "Filmed Zombe 2":           CWLocationData(rname.dungeon, 331, "Monster Tiers", "early"),
+    "Filmed Button Robot 2":    CWLocationData(rname.dungeon, 332, "Monster Tiers", "early"),
+    "Filmed Puffo 2":           CWLocationData(rname.dungeon, 333, "Monster Tiers", "early"),
+    "Filmed Whisk 2":           CWLocationData(rname.dungeon, 334, "Monster Tiers", "early"),
+    "Filmed Arms 2":            CWLocationData(rname.dungeon, 335, "Monster Tiers", "early"),
+    "Filmed Worm 2":            CWLocationData(rname.dungeon, 336, "Monster Tiers", "mid"),
+    "Filmed Mouthe 2":          CWLocationData(rname.dungeon, 337, "Monster Tiers", "mid"),
+    "Filmed Spider 2":          CWLocationData(rname.dungeon, 338, "Monster Tiers", "mid"),
+    "Filmed Bomber 2":          CWLocationData(rname.dungeon, 339, "Monster Tiers", "mid"),
+    "Filmed Dog 2":             CWLocationData(rname.dungeon, 340, "Monster Tiers", "mid"),
+    "Filmed Eye Guy 2":         CWLocationData(rname.dungeon, 341, "Monster Tiers", "mid"),
+    "Filmed Knifo 2":           CWLocationData(rname.dungeon, 342, "Monster Tiers", "mid"),
+    "Filmed Larva 2":           CWLocationData(rname.dungeon, 343, "Monster Tiers", "mid"),
+    "Filmed Harpooner 2":       CWLocationData(rname.dungeon, 344, "Monster Tiers", "mid"),
+    "Filmed Barnacle Ball 2":   CWLocationData(rname.dungeon, 345, "Monster Tiers", "mid"),
+    "Filmed Snatcho 2":         CWLocationData(rname.dungeon, 346, "Monster Tiers", "late"),
+    "Filmed Jelly 2":           CWLocationData(rname.dungeon, 347, "Monster Tiers", "late"),
+    "Filmed Fire 2":            CWLocationData(rname.dungeon, 348, "Monster Tiers", "late"),
+    "Filmed Mime 2":            CWLocationData(rname.dungeon, 349, "Monster Tiers", "late"),
+    "Filmed Streamer 2":        CWLocationData(rname.dungeon, 350, "Monster Tiers", "late"),
+
+    # ── Tier 3 (offsets 351–371) — all "late" stage ───────────────────────────
+    "Filmed Slurper 3":         CWLocationData(rname.dungeon, 351, "Monster Tiers", "late"),
+    "Filmed Zombe 3":           CWLocationData(rname.dungeon, 352, "Monster Tiers", "late"),
+    "Filmed Button Robot 3":    CWLocationData(rname.dungeon, 353, "Monster Tiers", "late"),
+    "Filmed Puffo 3":           CWLocationData(rname.dungeon, 354, "Monster Tiers", "late"),
+    "Filmed Whisk 3":           CWLocationData(rname.dungeon, 355, "Monster Tiers", "late"),
+    "Filmed Arms 3":            CWLocationData(rname.dungeon, 356, "Monster Tiers", "late"),
+    "Filmed Worm 3":            CWLocationData(rname.dungeon, 357, "Monster Tiers", "late"),
+    "Filmed Mouthe 3":          CWLocationData(rname.dungeon, 358, "Monster Tiers", "late"),
+    "Filmed Spider 3":          CWLocationData(rname.dungeon, 359, "Monster Tiers", "late"),
+    "Filmed Bomber 3":          CWLocationData(rname.dungeon, 360, "Monster Tiers", "late"),
+    "Filmed Dog 3":             CWLocationData(rname.dungeon, 361, "Monster Tiers", "late"),
+    "Filmed Eye Guy 3":         CWLocationData(rname.dungeon, 362, "Monster Tiers", "late"),
+    "Filmed Knifo 3":           CWLocationData(rname.dungeon, 363, "Monster Tiers", "late"),
+    "Filmed Larva 3":           CWLocationData(rname.dungeon, 364, "Monster Tiers", "late"),
+    "Filmed Harpooner 3":       CWLocationData(rname.dungeon, 365, "Monster Tiers", "late"),
+    "Filmed Barnacle Ball 3":   CWLocationData(rname.dungeon, 366, "Monster Tiers", "late"),
+    "Filmed Snatcho 3":         CWLocationData(rname.dungeon, 367, "Monster Tiers", "late"),
+    "Filmed Jelly 3":           CWLocationData(rname.dungeon, 368, "Monster Tiers", "late"),
+    "Filmed Fire 3":            CWLocationData(rname.dungeon, 369, "Monster Tiers", "late"),
+    "Filmed Mime 3":            CWLocationData(rname.dungeon, 370, "Monster Tiers", "late"),
+    "Filmed Streamer 3":        CWLocationData(rname.dungeon, 371, "Monster Tiers", "late"),
+
     # ==================== ARTIFACT FILMING CHECKS ====================
     # Early / mid game artifacts
     "Filmed Ribcage":       CWLocationData(rname.dungeon, 400, "Artifacts", "early"),
@@ -272,6 +328,9 @@ location_name_groups: Dict[str, Set[str]] = {
     },
     "Monsters": {
         name for name in location_table if location_table[name].location_group == "Monsters"
+    },
+    "Monster Tiers": {
+        name for name in location_table if location_table[name].location_group == "Monster Tiers"
     },
     "Artifacts": {
         name for name in location_table if location_table[name].location_group == "Artifacts"

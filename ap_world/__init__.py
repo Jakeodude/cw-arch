@@ -94,6 +94,8 @@ class ContentWarningWorld(World):
                 continue
             if grp == "Sponsorsanity" and not options.sponsorsanity.value:
                 continue
+            if grp == "Monster Tiers" and not options.monster_tiers.value:
+                continue
 
             # Quota locations: only up to quota_count are active
             if grp == "Quotas":
@@ -188,6 +190,8 @@ class ContentWarningWorld(World):
             disabled_groups.add("Sponsorsanity")
         elif not options.sponsorsanity.value:
             disabled_groups.add("Sponsorsanity")
+        if not options.monster_tiers.value:
+            disabled_groups.add("Monster Tiers")
 
         # Create all regions.
         for region_name in CW_regions:
@@ -281,4 +285,5 @@ class ContentWarningWorld(World):
             "sponsorsanity":                bool(options.sponsorsanity.value),
             "difficult_monsters":           bool(options.difficult_monsters.value),
             "multiplayer_mode":             bool(options.multiplayer_mode.value),
+            "monster_tiers":                bool(options.monster_tiers.value),
         }

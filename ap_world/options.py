@@ -145,6 +145,16 @@ class MultiplayerMode(Toggle):
     display_name = "Multiplayer Mode"
 
 
+class MonsterTiers(Toggle):
+    """When enabled, each non-difficult filmable monster gains two additional
+    filming location checks — Tier 2 and Tier 3 — representing multiple
+    encounters with the same monster across different dives.
+    No additional logic requirements apply beyond those of the base check
+    (dungeon depth rules still apply based on the monster's game stage).
+    Adds up to 42 new check locations to the pool."""
+    display_name = "Monster Tiers"
+
+
 # ===========================================================================
 # OPTIONS DATACLASS
 # ===========================================================================
@@ -169,3 +179,4 @@ class ContentWarningGameOptions(PerGameCommonOptions):
     sponsorsanity:          Sponsorsanity
     difficult_monsters:     DifficultMonsters
     multiplayer_mode:       MultiplayerMode
+    monster_tiers:          MonsterTiers
