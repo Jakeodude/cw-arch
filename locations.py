@@ -197,6 +197,42 @@ location_table: Dict[str, CWLocationData] = {
     # Filming equipment item in the dungeon
     "Filmed Reporter Mic":  CWLocationData(rname.dungeon, 412, "Artifacts", "early"),
 
+    # ==================== ARTIFACT FILMING TIERS (optional) ====================
+    # Enabled by the MonsterTiers option (same gate as monster tiers).
+    # Tier 2 preserves the base artifact's game_stage for non-filler artifacts;
+    # filler artifacts remain "filler" for all tiers.
+    # Tier 3 uses "late" for non-filler artifacts.
+
+    # ── Artifact Tier 2 (offsets 413–425) ────────────────────────────────────
+    "Filmed Ribcage 2":               CWLocationData(rname.dungeon, 413, "Monster Tiers", "early"),
+    "Filmed Skull 2":                 CWLocationData(rname.dungeon, 414, "Monster Tiers", "early"),
+    "Filmed Spine 2":                 CWLocationData(rname.dungeon, 415, "Monster Tiers", "early"),
+    "Filmed Bone 2":                  CWLocationData(rname.dungeon, 416, "Monster Tiers", "early"),
+    "Filmed Brain on a Stick 2":      CWLocationData(rname.dungeon, 417, "Monster Tiers", "filler"),
+    "Filmed Radio 2":                 CWLocationData(rname.dungeon, 418, "Monster Tiers", "filler"),
+    "Filmed Shroom 2":                CWLocationData(rname.dungeon, 419, "Monster Tiers", "filler"),
+    "Filmed Animal Statues 2":        CWLocationData(rname.dungeon, 420, "Monster Tiers", "filler"),
+    "Filmed Radioactive Container 2": CWLocationData(rname.dungeon, 421, "Monster Tiers", "filler"),
+    "Filmed Old Painting 2":          CWLocationData(rname.dungeon, 422, "Monster Tiers", "filler"),
+    "Filmed Chorby 2":                CWLocationData(rname.dungeon, 423, "Monster Tiers", "filler"),
+    "Filmed Apple 2":                 CWLocationData(rname.dungeon, 424, "Monster Tiers", "mid"),
+    "Filmed Reporter Mic 2":          CWLocationData(rname.dungeon, 425, "Monster Tiers", "early"),
+
+    # ── Artifact Tier 3 (offsets 426–438) ────────────────────────────────────
+    "Filmed Ribcage 3":               CWLocationData(rname.dungeon, 426, "Monster Tiers", "late"),
+    "Filmed Skull 3":                 CWLocationData(rname.dungeon, 427, "Monster Tiers", "late"),
+    "Filmed Spine 3":                 CWLocationData(rname.dungeon, 428, "Monster Tiers", "late"),
+    "Filmed Bone 3":                  CWLocationData(rname.dungeon, 429, "Monster Tiers", "late"),
+    "Filmed Brain on a Stick 3":      CWLocationData(rname.dungeon, 430, "Monster Tiers", "filler"),
+    "Filmed Radio 3":                 CWLocationData(rname.dungeon, 431, "Monster Tiers", "filler"),
+    "Filmed Shroom 3":                CWLocationData(rname.dungeon, 432, "Monster Tiers", "filler"),
+    "Filmed Animal Statues 3":        CWLocationData(rname.dungeon, 433, "Monster Tiers", "filler"),
+    "Filmed Radioactive Container 3": CWLocationData(rname.dungeon, 434, "Monster Tiers", "filler"),
+    "Filmed Old Painting 3":          CWLocationData(rname.dungeon, 435, "Monster Tiers", "filler"),
+    "Filmed Chorby 3":                CWLocationData(rname.dungeon, 436, "Monster Tiers", "filler"),
+    "Filmed Apple 3":                 CWLocationData(rname.dungeon, 437, "Monster Tiers", "late"),
+    "Filmed Reporter Mic 3":          CWLocationData(rname.dungeon, 438, "Monster Tiers", "late"),
+
     # ==================== STORE PURCHASE CHECKS ====================
     # Early game store purchases
     "Bought Old Flashlight":  CWLocationData(rname.hub, 500, "Store Purchases", "early"),
