@@ -230,26 +230,33 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
     _MULTIPLAYER_ONLY: set = {"Filmed Weeping", "Filmed Worm"}
     multiplayer_on = bool(options.multiplayer_mode.value)
 
-    # Base locations are always present in the multiworld (marked EXCLUDED in
-    # solo seeds but never omitted entirely).  Wrapped in try/except as a
-    # belt-and-suspenders guard against future option combinations.
-    for mp_loc in _MULTIPLAYER_ONLY:
-        try:
-            add_rule(
-                multiworld.get_location(mp_loc, player),
-                lambda state, mp=multiplayer_on: mp,
-            )
-        except KeyError:
-            pass  # location not present in this generation — skip
+    # Only add access rules when multiplayer is ON.
+    # In solo seeds, omitting the rule keeps these locations reachable in the
+    # logic graph (satisfying Full Accessibility); LocationProgressType.EXCLUDED
+    # already ensures the generator never places progression items there.
+    # When multiplayer is ON the rule is a no-op (lambda state: True), acting
+    # purely as a semantic marker that these are multiplayer-only checks.
+    if multiplayer_on:
+        for mp_loc in _MULTIPLAYER_ONLY:
+            try:
+                add_rule(
+                    multiworld.get_location(mp_loc, player),
+                    lambda state: True,
+                )
+            except KeyError:
+                pass  # location not present in this generation — skip
 
-    # Worm tier locations only exist when MonsterTiers is enabled.
-    if options.monster_tiers.value:
-        for tier_num in (2, 3):
-            worm_tier = f"Filmed Worm {tier_num}"
-            add_rule(
-                multiworld.get_location(worm_tier, player),
-                lambda state, mp=multiplayer_on: mp,
-            )
+        # Worm tier locations only exist when MonsterTiers is enabled.
+        if options.monster_tiers.value:
+            for tier_num in (2, 3):
+                worm_tier = f"Filmed Worm {tier_num}"
+                try:
+                    add_rule(
+                        multiworld.get_location(worm_tier, player),
+                        lambda state: True,
+                    )
+                except KeyError:
+                    pass  # location not present — skip
 
     # -----------------------------------------------------------------------
     # Quota rules: each quota N requires quota N-1 to be reachable.
