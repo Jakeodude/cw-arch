@@ -190,6 +190,10 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
     for loc_name, loc_data in location_table.items():
         if loc_data.region != rname.dungeon:
             continue
+        # Monster Tier locations are only created when the MonsterTiers option
+        # is enabled.  Skip them here to avoid a KeyError when the option is off.
+        if loc_data.location_group == "Monster Tiers" and not options.monster_tiers.value:
+            continue
 
         if loc_data.game_stage == "mid":
             add_rule(
@@ -208,17 +212,33 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
     # When Multiplayer Mode is off these locations are already marked EXCLUDED
     # in create_regions; the rule here enforces the logic constraint so AP
     # never treats them as reachable in solo seeds.
+    #
+    # "Filmed Worm 2" / "Filmed Worm 3" (Monster Tier locations) also inherit
+    # the multiplayer requirement; they only exist when MonsterTiers is on.
     # -----------------------------------------------------------------------
-    # Both locations are always present in the multiworld (difficult/mid stage
-    # locations are added but marked EXCLUDED; they are never removed entirely).
     _MULTIPLAYER_ONLY: set = {"Filmed Weeping", "Filmed Worm"}
     multiplayer_on = bool(options.multiplayer_mode.value)
 
+    # Base locations are always present in the multiworld (marked EXCLUDED in
+    # solo seeds but never omitted entirely).  Wrapped in try/except as a
+    # belt-and-suspenders guard against future option combinations.
     for mp_loc in _MULTIPLAYER_ONLY:
-        add_rule(
-            multiworld.get_location(mp_loc, player),
-            lambda state, mp=multiplayer_on: mp,
-        )
+        try:
+            add_rule(
+                multiworld.get_location(mp_loc, player),
+                lambda state, mp=multiplayer_on: mp,
+            )
+        except KeyError:
+            pass  # location not present in this generation — skip
+
+    # Worm tier locations only exist when MonsterTiers is enabled.
+    if options.monster_tiers.value:
+        for tier_num in (2, 3):
+            worm_tier = f"Filmed Worm {tier_num}"
+            add_rule(
+                multiworld.get_location(worm_tier, player),
+                lambda state, mp=multiplayer_on: mp,
+            )
 
     # -----------------------------------------------------------------------
     # Quota rules: each quota N requires quota N-1 to be reachable.
