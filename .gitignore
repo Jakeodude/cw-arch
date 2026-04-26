@@ -1,0 +1,15 @@
+# Python bytecode caches
+# Note: this repo intentionally tracks specific cpython-312 .pyc files
+# (see commit history). gitignore does not untrack already-tracked files,
+# so those remain versioned; only new/untracked __pycache__ entries from
+# other Python versions or local toolruns are ignored.
+__pycache__/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS / editor noise
+.DS_Store
+*.swp
