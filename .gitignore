@@ -4,12 +4,44 @@
 # so those remain versioned; only new/untracked __pycache__ entries from
 # other Python versions or local toolruns are ignored.
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Virtual environments
-.venv/
 venv/
+ENV/
 env/
+.venv/
 
-# OS / editor noise
-.DS_Store
+# IDE
+.vscode/
+.idea/
 *.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
