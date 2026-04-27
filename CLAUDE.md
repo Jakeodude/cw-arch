@@ -93,4 +93,19 @@ logger.info(f"[CWWorld] Creating items: {len(self.multiworld.itempool)} total")
 - Don't add speculative abstractions or backwards-compat shims. The APWorld is at v0.1; ship simple changes.
 - The reference mod [`../cw-reference/`](../cw-reference/cw-reference/) (decompiled CW source + examples) is read-only — use it for game-internals lookups only.
 - Check the Archipelago [docs](https://archipelago.gg/docs/) for World API patterns (regions, rules, item classification, etc.).
-- Ask the sibling mod repo (via `Closes` in a cross-repo PR) if changes need coordination.
+
+## Working with issues
+
+Issues are filed with detailed Actionable Tasks lists, often co-authored with another AI assistant before reaching the repo. Trust the *mechanical* parts (renames, reorders, file moves); expect ambiguity in the *domain* parts — anything where the right answer depends on game-side knowledge or playtest experience the issue author has and you don't.
+
+Before coding:
+
+1. **Read related issues together.** Cross-references like "Following the X refactor…" or shared option/slot-data names mean issues are dependent — implement and merge them in **one PR**. Splitting them lands dead config in `main` between merges and forces the sibling-repo update to happen twice.
+2. **Surface ambiguities first via `gh issue comment <num>`.** When a task needs context the issue text doesn't supply, post numbered questions with a/b/c options and a recommended pick. Move on to other workable issues while waiting — do not guess. The issue author is the only person who can answer; comments also create a durable record for whoever (or whichever AI) picks the work up later.
+3. **Flag cross-repo coordination.** Slot-data key renames, item/location ID changes, new in-game pickups, and new client events all require matching changes in the sibling repo (apworld ↔ mod). When surfacing questions, call these out so the sibling-repo issue can be filed in the same window and both sides land together.
+
+## Branch hygiene
+
+- One branch per issue, or per issue group bundled into one PR. Names: `fix/issue-N-<slug>`.
+- **Don't piggyback unrelated commits.** Drive-by changes on a feature branch invite merge conflicts that have nothing to do with the issue's actual work, and force a force-push to recover.
+- Use `Closes #N` (or `Closes Org/Repo#N` for cross-repo) in PR descriptions so issues auto-close on merge.
