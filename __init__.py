@@ -33,12 +33,24 @@ _HIGH_VIEW_MILESTONES = {
 }
 
 # Monster locations that require Multiplayer Mode (player_count > 1).
-# These are marked EXCLUDED in solo seeds and gated by an access rule in rules.py.
-# Worm was previously here but has been confirmed to spawn solo, so it is
-# treated as a normal mid-stage monster and may receive real items in any seed.
+# In solo seeds these locations are skipped entirely in create_regions — the
+# player cannot encounter the monster without other players in the lobby, so
+# leaving the check in the world (even as filler) would strand any item
+# placed there.  Worm was previously here but has been confirmed to spawn
+# solo and is now treated as a normal mid-stage monster.
 _MULTIPLAYER_ONLY_MONSTERS = {
     "Filmed Weeping",
 }
+
+# Tier 2/3 of multiplayer-only monsters inherit the same gate.  Difficult
+# monsters (including Weeping) currently have no Monster Tiers entries in
+# locations.py, so this set extension is defensive — it ensures the right
+# behaviour automatically if tier 2/3 are ever added for these monsters.
+_MULTIPLAYER_ONLY_LOCATIONS = (
+    set(_MULTIPLAYER_ONLY_MONSTERS)
+    | {f"{m} 2" for m in _MULTIPLAYER_ONLY_MONSTERS}
+    | {f"{m} 3" for m in _MULTIPLAYER_ONLY_MONSTERS}
+)
 
 
 class ContentWarningWebWorld(WebWorld):
@@ -76,7 +88,7 @@ class ContentWarningWorld(World):
         given the current option settings.
 
         Excludes:
-          • Multiplayer-only monsters (Weeping, Worm) when multiplayer_mode is off.
+          • Multiplayer-only monsters (Weeping) when multiplayer_mode is off.
           • Difficult-stage monsters when difficult_monsters is off.
         Used by generate_early to clamp monster_hunter_count, and mirrored in
         rules.py when constructing the monster_hunter victory rule.
@@ -114,6 +126,11 @@ class ContentWarningWorld(World):
             if grp == "Sponsorsanity" and not options.sponsorsanity.value:
                 continue
             if grp == "Monster Tiers" and not options.monster_tiers.value:
+                continue
+
+            # Multiplayer-only checks: skip in solo so the location count
+            # matches what create_regions will actually produce.
+            if loc_name in _MULTIPLAYER_ONLY_LOCATIONS and not options.multiplayer_mode.value:
                 continue
 
             # Quota locations: only up to quota_count are active
@@ -250,6 +267,13 @@ class ContentWarningWorld(World):
             if loc_data.location_group in disabled_groups:
                 continue
 
+            # Solo seeds: completely omit multiplayer-only checks.  Marking
+            # them EXCLUDED would still place a filler item at a location the
+            # player can never reach, stranding the item and inflating the
+            # location count.
+            if loc_name in _MULTIPLAYER_ONLY_LOCATIONS and not options.multiplayer_mode.value:
+                continue
+
             # Variable quota count: skip quotas beyond the configured number.
             if loc_data.location_group == "Quotas":
                 if not quota_on:
@@ -273,9 +297,6 @@ class ContentWarningWorld(World):
             elif loc_name in _HIGH_VIEW_MILESTONES and low_quota:
                 # When quota goal is low, high-view milestones are unachievable
                 # in a short run — only filler is placed there.
-                loc.progress_type = LocationProgressType.EXCLUDED
-            elif loc_name in _MULTIPLAYER_ONLY_MONSTERS and not options.multiplayer_mode.value:
-                # Solo play: multiplayer-only monster checks always get filler.
                 loc.progress_type = LocationProgressType.EXCLUDED
             elif (
                 loc_data.location_group == "Monster Tiers"

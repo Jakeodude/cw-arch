@@ -138,10 +138,11 @@ class DifficultMonsters(Toggle):
 
 class MultiplayerMode(Toggle):
     """Enable if this game is being played in multiplayer (more than one player).
-    When enabled, multiplayer-only monster locations (Weeping and Worm) become
-    logically accessible and can receive real items.
-    When disabled (default / solo play), those locations are excluded and
-    always contain filler rewards."""
+    When enabled, multiplayer-only monster locations (Weeping) are added to
+    the world and can receive real items.
+    When disabled (default / solo play), those locations are completely
+    omitted from generation — the player would never be able to film them
+    without other players in the lobby."""
     display_name = "Multiplayer Mode"
 
 

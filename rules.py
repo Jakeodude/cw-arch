@@ -220,8 +220,9 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
     # -----------------------------------------------------------------------
     # Multiplayer-only monster rules
     # "Filmed Weeping" requires Multiplayer Mode to be on.  When off, the
-    # location is already marked EXCLUDED in create_regions; the no-op rule
-    # here when multiplayer is on is a semantic marker only.
+    # location is not created at all (see create_regions), so no rule is
+    # needed here for solo seeds.  The no-op rule added when multiplayer is
+    # on is a semantic marker only.
     # -----------------------------------------------------------------------
     _MULTIPLAYER_ONLY: set = {"Filmed Weeping"}
     multiplayer_on = bool(options.multiplayer_mode.value)
