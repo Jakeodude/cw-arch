@@ -135,11 +135,11 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
     if "monster_hunter" in goal:
         count = options.monster_hunter_count.value
         # Build the reachable monster list filtered by the current option set:
-        #   • Multiplayer-only monsters (Weeping, Worm) are excluded in solo seeds.
+        #   • Multiplayer-only monsters (Weeping) are excluded in solo seeds.
         #   • Difficult monsters are excluded unless DifficultMonsters is enabled.
         # This prevents a FillError when monster_hunter_count exceeds the actual
         # number of reachable locations (e.g., solo seed with count=21+).
-        _mp_only_monsters = {"Filmed Weeping", "Filmed Worm"}
+        _mp_only_monsters = {"Filmed Weeping"}
         monster_locs: List[str] = [
             n for n, d in location_table.items()
             if d.location_group == "Monsters"
@@ -219,23 +219,14 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
 
     # -----------------------------------------------------------------------
     # Multiplayer-only monster rules
-    # "Filmed Weeping" and "Filmed Worm" require Multiplayer Mode to be on.
-    # When Multiplayer Mode is off these locations are already marked EXCLUDED
-    # in create_regions; the rule here enforces the logic constraint so AP
-    # never treats them as reachable in solo seeds.
-    #
-    # "Filmed Worm 2" / "Filmed Worm 3" (Monster Tier locations) also inherit
-    # the multiplayer requirement; they only exist when MonsterTiers is on.
+    # "Filmed Weeping" requires Multiplayer Mode to be on.  When off, the
+    # location is not created at all (see create_regions), so no rule is
+    # needed here for solo seeds.  The no-op rule added when multiplayer is
+    # on is a semantic marker only.
     # -----------------------------------------------------------------------
-    _MULTIPLAYER_ONLY: set = {"Filmed Weeping", "Filmed Worm"}
+    _MULTIPLAYER_ONLY: set = {"Filmed Weeping"}
     multiplayer_on = bool(options.multiplayer_mode.value)
 
-    # Only add access rules when multiplayer is ON.
-    # In solo seeds, omitting the rule keeps these locations reachable in the
-    # logic graph (satisfying Full Accessibility); LocationProgressType.EXCLUDED
-    # already ensures the generator never places progression items there.
-    # When multiplayer is ON the rule is a no-op (lambda state: True), acting
-    # purely as a semantic marker that these are multiplayer-only checks.
     if multiplayer_on:
         for mp_loc in _MULTIPLAYER_ONLY:
             try:
@@ -245,18 +236,6 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
                 )
             except KeyError:
                 pass  # location not present in this generation — skip
-
-        # Worm tier locations only exist when MonsterTiers is enabled.
-        if options.monster_tiers.value:
-            for tier_num in (2, 3):
-                worm_tier = f"Filmed Worm {tier_num}"
-                try:
-                    add_rule(
-                        multiworld.get_location(worm_tier, player),
-                        lambda state: True,
-                    )
-                except KeyError:
-                    pass  # location not present — skip
 
     # -----------------------------------------------------------------------
     # Quota rules: each quota N requires quota N-1 to be reachable.

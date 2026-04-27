@@ -138,10 +138,11 @@ class DifficultMonsters(Toggle):
 
 class MultiplayerMode(Toggle):
     """Enable if this game is being played in multiplayer (more than one player).
-    When enabled, multiplayer-only monster locations (Weeping and Worm) become
-    logically accessible and can receive real items.
-    When disabled (default / solo play), those locations are excluded and
-    always contain filler rewards."""
+    When enabled, multiplayer-only monster locations (Weeping) are added to
+    the world and can receive real items.
+    When disabled (default / solo play), those locations are completely
+    omitted from generation — the player would never be able to film them
+    without other players in the lobby."""
     display_name = "Multiplayer Mode"
 
 
@@ -153,6 +154,17 @@ class MonsterTiers(Toggle):
     (dungeon depth rules still apply based on the monster's game stage).
     Adds up to 42 new check locations to the pool."""
     display_name = "Monster Tiers"
+
+
+class FillerMultiSightings(DefaultOnToggle):
+    """When enabled, all monster and artifact tier-2 / tier-3 locations
+    (the 'Monster Tiers' group, created by the Monster Tiers option) hold
+    only filler items — no progression or useful items are placed there.
+    The locations themselves still exist; only their item classification is
+    constrained.  Disable to let real items spawn behind multi-sighting
+    checks, increasing item-pool density at the cost of more required dives.
+    Has no effect when Monster Tiers is disabled."""
+    display_name = "Filler Multi-Sightings"
 
 
 # ===========================================================================
@@ -180,3 +192,4 @@ class ContentWarningGameOptions(PerGameCommonOptions):
     difficult_monsters:     DifficultMonsters
     multiplayer_mode:       MultiplayerMode
     monster_tiers:          MonsterTiers
+    filler_multi_sightings: FillerMultiSightings
