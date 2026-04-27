@@ -1,0 +1,19 @@
+# Normalise line endings: LF in the repository regardless of contributor OS.
+# Source files are also LF on checkout so cross-platform diffs stay clean.
+* text=auto
+
+# Source / config — always LF
+*.py    text eol=lf
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.toml  text eol=lf
+
+# Documentation — always LF
+*.md    text eol=lf
+*.txt   text eol=lf
+
+# Binary
+*.pyc     binary
+*.apworld binary
+*.so      binary
