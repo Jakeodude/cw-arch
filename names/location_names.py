@@ -2,33 +2,29 @@
 
 # ---- Extractions ----
 any_extraction            = "Any Extraction"
-extracted_footage_prefix  = "Extracted Footage on Day "   # + str(day_number)
+extracted_footage_prefix  = "Extracted Footage on Day "   # + str(day_number), 1..63
 
 # ---- Quotas ----
-met_quota_prefix = "Met Quota "   # + str(quota_number)
+met_quota_prefix = "Met Quota "   # + str(quota_number), 1..21
 
 # ---- View Milestones ----
-reached_1k   = "Reached 1,000 Total Views"
-reached_2k   = "Reached 2,000 Total Views"
-reached_3k   = "Reached 3,000 Total Views"
-reached_13k  = "Reached 13,000 Total Views"
-reached_26k  = "Reached 26,000 Total Views"
-reached_39k  = "Reached 39,000 Total Views"
-reached_43k  = "Reached 43,000 Total Views"
-reached_85k  = "Reached 85,000 Total Views"
-reached_128k = "Reached 128,000 Total Views"
-reached_150k = "Reached 150,000 Total Views"
-reached_220k = "Reached 220,000 Total Views"
-reached_325k = "Reached 325,000 Total Views"
-reached_375k = "Reached 375,000 Total Views"
-reached_430k = "Reached 430,000 Total Views"
-reached_645k = "Reached 645,000 Total Views"
-reached_850k = "Reached 850,000 Total Views"
-reached_1m   = "Reached 1,000,000 Total Views"
+# Lifetime-total milestones; one per in-game day (1..63).  See VIEW_MILESTONES
+# in locations.py for the canonical (day, lifetime_total, quota) table.
+
+def reached_total_views(total: int) -> str:
+    """Canonical name for a lifetime-views milestone location."""
+    return f"Reached {total:,} Total Views"
+
 
 # ---- Sponsorships ----
-accepted_sponsorship_prefix  = "Accepted Sponsorship "   # + "1", "2", "3"
-completed_sponsorship_prefix = "Completed Sponsorship "  # + difficulty name
+# After issue #5 the trigger is per-completion (mod-side).  Active count per
+# seed is QuotaCount - 1, capped at 20.
+completed_sponsorship_prefix = "Completed Sponsorship "   # + str(N), 1..20
+
+# ---- Viral Sensation event ----
+# Client-emitted check fired when the player crosses 1,000,000 views in a
+# single quota.  Only added to the world when the viral_sensation goal is on.
+viral_sensation_achieved = "Viral Sensation Achieved"
 
 # ---- Victory ----
 victory = "Victory"

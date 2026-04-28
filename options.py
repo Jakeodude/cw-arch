@@ -1,143 +1,148 @@
 # worlds/content_warning/options.py
 
 from dataclasses import dataclass
-from Options import OptionSet, Toggle, DefaultOnToggle, Range, PerGameCommonOptions
+from Options import Toggle, DefaultOnToggle, Range, PerGameCommonOptions
 
 
 # ===========================================================================
-# GOAL
+# GOAL TOGGLES
+#
+# Any combination of goal toggles may be enabled.  All enabled goals must be
+# satisfied to win (AND semantics).  At least one goal should be on; by
+# default ViralSensation is on so a fresh YAML always has a winnable seed.
 # ===========================================================================
 
-class GoalChoice(OptionSet):
-    """Choose one or more victory conditions. All selected conditions must be
-    completed to win. Select any combination from the list below.
+class ViralSensation(DefaultOnToggle):
+    """Reach 1,000,000 views in a single quota.
+    Fired by the client when the threshold is crossed in-game."""
+    display_name = "Viral Sensation Goal"
 
-    viral_sensation:  Reach 1,000,000 total views — the highest view milestone.
-    views_goal:       Reach a configurable total view count (see Views Goal Target).
-    quota_goal:       Reach and complete a configurable number of quotas
-                      (see Quota Requirement and Quota Count; requires Quota Requirement on).
-    monster_hunter:   Film a configurable number of different monsters (see Monster Hunter Count).
-    hat_collector:    Purchase a configurable number of hats (see Hat Collector Count).
-                      Note: automatically ignored if Include Hat Purchases is disabled.
-    item_collector:   Purchase a configurable number of store items and emotes
-                      (see Item Collector Count).
-                      Note: automatically ignored if Include Emote Purchases is disabled."""
-    display_name = "Goal"
-    valid_keys = frozenset({
-        "viral_sensation",
-        "views_goal",
-        "quota_goal",
-        "monster_hunter",
-        "hat_collector",
-        "item_collector",
-    })
-    default = frozenset({"viral_sensation"})
+
+class ViewsGoal(Toggle):
+    """Reach the configurable lifetime view target (Views Goal Target).
+    Requires Views Checks to be enabled — if Views Checks is off, this
+    goal is treated as off."""
+    display_name = "Views Goal"
+
+
+class ViewsChecks(DefaultOnToggle):
+    """When enabled, lifetime-view milestone locations are part of the pool.
+    Disable to remove all view threshold locations from generation.
+    If off, views_goal is invalid."""
+    display_name = "Views Checks"
 
 
 class ViewsGoalTarget(Range):
-    """When Goal is 'views_goal', this sets the required total views to win.
-    The game uses the nearest view milestone at or above the configured value.
-    Ignored when Goal is not 'views_goal'."""
+    """When Views Goal is enabled, the lifetime view total required to win.
+    The world uses the nearest lifetime-view milestone at or above this value.
+    Maximum 33,739,000 — the highest reachable lifetime total at the maximum
+    quota count (day 63)."""
     display_name = "Views Goal Target"
-    range_start  = 1000
-    range_end    = 1000000
-    default      = 128000
+    range_start  = 0
+    range_end    = 33_739_000
+    default      = 500_000
+
+
+class QuotaGoal(Toggle):
+    """Reach and complete the configured number of quotas.
+    Requires Quota Requirement to be enabled — if Quota Requirement is off,
+    this goal is treated as off."""
+    display_name = "Quota Goal"
+
+
+class QuotaRequirement(DefaultOnToggle):
+    """When enabled, quota checks are included in the location pool and
+    completing quotas can be part of the goal.
+    When disabled, all quota-related checks are removed from the pool.
+    If turned off, the Quota Goal will be invalid."""
+    display_name = "Quota Requirement"
+
+
+class QuotaCount(Range):
+    """The number of quotas to play through.  Drives the active count of
+    Quota / Day Extraction / Sponsorship locations and (if Quota Goal is on)
+    the number required to win.
+    Each quota is 3 days, so day-extraction checks run from day 1 to
+    QuotaCount * 3.  Sponsorship checks run from 1 to QuotaCount - 1
+    (capped at 20)."""
+    display_name = "Quota Count"
+    range_start  = 1
+    range_end    = 21
+    default      = 5
+
+
+class MonsterHunter(Toggle):
+    """Film a configurable number of distinct monsters (Monster Hunter Count)
+    to win."""
+    display_name = "Monster Hunter Goal"
 
 
 class MonsterHunterCount(Range):
-    """When Goal is 'monster_hunter', the number of different monsters that must
-    be filmed to win. Minimum 5, maximum 33.
-    Note: an average 5-quota run encounters an average of 15-20 monsters."""
+    """When Monster Hunter is enabled, the number of distinct monsters that
+    must be filmed to win.  Minimum 5, maximum 33.
+    Note: an average 5-quota run encounters 15-20 monsters."""
     display_name = "Monster Hunter Count"
     range_start  = 5
     range_end    = 33
     default      = 12
 
 
+class MonsterTiers(Toggle):
+    """When enabled, each non-difficult filmable monster gains two additional
+    filming location checks (2nd and 3rd sightings).  Adds up to 42 extra
+    location checks across non-difficult monsters and artifacts.  No new
+    logic is added beyond the dungeon-depth rules of the base check."""
+    display_name = "Monster Tiers"
+
+
+class FillerMultiSightings(DefaultOnToggle):
+    """When enabled, all 2nd / 3rd sighting locations created by Monster
+    Tiers hold filler items only — no progression items spawn there.
+    Disable to let real items spawn behind multi-sighting checks at the
+    cost of more required dives.  No effect when Monster Tiers is off."""
+    display_name = "Filler Multi-Sightings"
+
+
+class DifficultMonsters(Toggle):
+    """When enabled, difficult/rare monsters (Flicker, Cam Creep, Infiltrator,
+    Black Hole Bot, Ear, Snail Spawner, Big Slap, Ultra Knifo, Weeping)
+    can have real (non-filler) items behind their base filming checks.
+    Tier 2 / Tier 3 of difficult monsters always remain filler regardless
+    of this option."""
+    display_name = "Difficult Monsters Have Real Items"
+
+
+class HatCollector(Toggle):
+    """Purchase a configurable number of hats (Hat Collector Count) to win."""
+    display_name = "Hat Collector Goal"
+
+
 class HatCollectorCount(Range):
-    """When Goal is 'hat_collector', the number of hats that must be purchased
-    to win. Minimum 5, maximum 31 (total hats available).
-    Ignored when Include Hat Purchases is disabled (hat_collector goal is inactive)."""
+    """When Hat Collector is enabled, the number of hats that must be
+    purchased to win.  Minimum 5, maximum 31 (total hats available)."""
     display_name = "Hat Collector Count"
     range_start  = 5
     range_end    = 31
     default      = 15
 
 
-class ItemCollectorCount(Range):
-    """When Goal is 'item_collector', the number of store items and emotes that
-    must be purchased to win. Minimum 5, maximum 33.
-    Ignored when Include Emote Purchases is disabled (item_collector goal is inactive)."""
-    display_name = "Item Collector Count"
-    range_start  = 5
-    range_end    = 33
-    default      = 10
-
-
-# ===========================================================================
-# QUOTA
-# ===========================================================================
-
-class QuotaRequirement(DefaultOnToggle):
-    """When enabled, quota checks are included in the location pool and
-    completing quotas can be part of the goal.
-    When disabled, ALL quota-related checks are removed from the pool
-    (the 'quota_goal' Goal option becomes invalid and falls back to
-    'viral_sensation')."""
-    display_name = "Quota Requirement"
-
-
-class QuotaCount(Range):
-    """The number of quotas that must be reached and completed.
-    Controls both how many quota locations exist in the pool and (if
-    Goal is 'quota_goal') how many are required to win.
-    Minimum 1, maximum 10.
-    Requires Quota Requirement to be enabled."""
-    display_name = "Quota Count"
-    range_start  = 1
-    range_end    = 10
-    default      = 5
-
-
-# ===========================================================================
-# OPTIONAL LOCATION GROUPS
-# ===========================================================================
-
-class IncludeHats(DefaultOnToggle):
-    """When enabled, purchasing each hat from Phil's Hat Shop is a check location.
-    Disable to remove all hat locations from the pool."""
-    display_name = "Include Hat Purchases"
-
-
-class IncludeEmotes(DefaultOnToggle):
-    """When enabled, purchasing each emote from the store is a check location.
-    Disable to remove all emote locations from the pool."""
-    display_name = "Include Emote Purchases"
-
-
 class IncludeSponsorship(DefaultOnToggle):
-    """When enabled, accepting sponsorships (3 checks) are check locations.
-    Disable to remove all sponsorship acceptance locations from the pool."""
+    """When enabled, sponsorship checks are included in the pool.
+    Each completed sponsorship grants the next sponsorship check in
+    order; the active count per seed is QuotaCount - 1, capped at 20."""
     display_name = "Include Sponsorships"
 
 
-class Sponsorsanity(Toggle):
-    """When enabled, completing each sponsorship difficulty
-    (Easy, Medium, Hard, Very Hard) adds extra check locations.
-    Requires Include Sponsorships to be enabled."""
-    display_name = "Sponsorsanity"
-
-
-class DifficultMonsters(Toggle):
-    """When enabled, difficult/rare monsters (Flicker, Cam Creep, Infiltrator,
-    Black Hole Bot, Ear, Snail Spawner, Big Slap, Ultra Knifo) can
-    have real (non-filler) items behind their filming checks.
-    When disabled (default), those checks always contain filler rewards."""
-    display_name = "Difficult Monsters Have Real Items"
+class SponsorFiller(DefaultOnToggle):
+    """When enabled (default), all sponsor locations contain filler items.
+    Sponsorships are RNG-dependent and can be hard to complete; this keeps
+    progression away from them by default.  Disable to let progression items
+    spawn at sponsor locations."""
+    display_name = "Sponsor Filler"
 
 
 class MultiplayerMode(Toggle):
-    """Enable if this game is being played in multiplayer (more than one player).
+    """Enable if this game is played in multiplayer (more than one player).
     When enabled, multiplayer-only monster locations (Weeping) are added to
     the world and can receive real items.
     When disabled (default / solo play), those locations are completely
@@ -146,50 +151,27 @@ class MultiplayerMode(Toggle):
     display_name = "Multiplayer Mode"
 
 
-class MonsterTiers(Toggle):
-    """When enabled, each non-difficult filmable monster gains two additional
-    filming location checks — Tier 2 and Tier 3 — representing multiple
-    encounters with the same monster across different dives.
-    No additional logic requirements apply beyond those of the base check
-    (dungeon depth rules still apply based on the monster's game stage).
-    Adds up to 42 new check locations to the pool."""
-    display_name = "Monster Tiers"
-
-
-class FillerMultiSightings(DefaultOnToggle):
-    """When enabled, all monster and artifact tier-2 / tier-3 locations
-    (the 'Monster Tiers' group, created by the Monster Tiers option) hold
-    only filler items — no progression or useful items are placed there.
-    The locations themselves still exist; only their item classification is
-    constrained.  Disable to let real items spawn behind multi-sighting
-    checks, increasing item-pool density at the cost of more required dives.
-    Has no effect when Monster Tiers is disabled."""
-    display_name = "Filler Multi-Sightings"
-
-
 # ===========================================================================
 # OPTIONS DATACLASS
 # ===========================================================================
+# Order intentionally mirrors the spec in issue #5.
 
 @dataclass
 class ContentWarningGameOptions(PerGameCommonOptions):
-    # Goal
-    goal:                       GoalChoice
-    views_goal_target:          ViewsGoalTarget
-    monster_hunter_count:       MonsterHunterCount
-    hat_collector_count:        HatCollectorCount
-    item_collector_count:       ItemCollectorCount
-
-    # Quota
-    quota_requirement:          QuotaRequirement
-    quota_count:                QuotaCount
-
-    # Optional location groups
-    include_hats:           IncludeHats
-    include_emotes:         IncludeEmotes
-    include_sponsorships:   IncludeSponsorship
-    sponsorsanity:          Sponsorsanity
-    difficult_monsters:     DifficultMonsters
-    multiplayer_mode:       MultiplayerMode
+    viral_sensation:        ViralSensation
+    views_goal:             ViewsGoal
+    views_checks:           ViewsChecks
+    views_goal_target:      ViewsGoalTarget
+    quota_goal:             QuotaGoal
+    quota_requirement:      QuotaRequirement
+    quota_count:            QuotaCount
+    monster_hunter:         MonsterHunter
+    monster_hunter_count:   MonsterHunterCount
     monster_tiers:          MonsterTiers
     filler_multi_sightings: FillerMultiSightings
+    difficult_monsters:     DifficultMonsters
+    hat_collector:          HatCollector
+    hat_collector_count:    HatCollectorCount
+    include_sponsorships:   IncludeSponsorship
+    sponsor_filler:         SponsorFiller
+    multiplayer_mode:       MultiplayerMode

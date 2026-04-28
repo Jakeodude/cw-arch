@@ -1,6 +1,6 @@
 # worlds/content_warning/locations.py
 
-from typing import Dict, Optional, Set, NamedTuple
+from typing import Dict, List, Optional, Set, Tuple, NamedTuple
 from BaseClasses import Location
 
 from .names import region_names as rname
@@ -24,64 +24,107 @@ class CWLocationData(NamedTuple):
     game_stage: str = "mid"
 
 
+# ==================== VIEW MILESTONE TABLE ====================
+# Per-day lifetime-views milestones (canonical, from Jake's spreadsheet).
+# (day, lifetime_total_views, quota_number).  Source of truth for both the
+# locations generated below and the access rules in rules.py.
+VIEW_MILESTONES: List[Tuple[int, int, int]] = [
+    (1,  1_000,      1), (2,  2_000,      1), (3,  3_000,      1),
+    (4,  16_000,     2), (5,  29_000,     2), (6,  42_000,     2),
+    (7,  84_667,     3), (8,  127_333,    3), (9,  170_000,    3),
+    (10, 278_333,    4), (11, 386_667,    4), (12, 495_000,    4),
+    (13, 709_667,    5), (14, 924_333,    5), (15, 1_139_000,  5),
+    (16, 1_505_667,  6), (17, 1_872_333,  6), (18, 2_239_000,  6),
+    (19, 2_839_000,  7), (20, 3_439_000,  7), (21, 4_039_000,  7),
+    (22, 4_639_000,  8), (23, 5_239_000,  8), (24, 5_839_000,  8),
+    (25, 6_472_333,  9), (26, 7_105_667,  9), (27, 7_739_000,  9),
+    (28, 8_372_333, 10), (29, 9_005_667, 10), (30, 9_639_000, 10),
+    (31, 10_305_667, 11), (32, 10_972_333, 11), (33, 11_639_000, 11),
+    (34, 12_305_667, 12), (35, 12_972_333, 12), (36, 13_639_000, 12),
+    (37, 14_305_667, 13), (38, 14_972_333, 13), (39, 15_639_000, 13),
+    (40, 16_339_000, 14), (41, 17_039_000, 14), (42, 17_739_000, 14),
+    (43, 18_439_000, 15), (44, 19_139_000, 15), (45, 19_839_000, 15),
+    (46, 20_572_333, 16), (47, 21_305_667, 16), (48, 22_039_000, 16),
+    (49, 22_772_333, 17), (50, 23_505_667, 17), (51, 24_239_000, 17),
+    (52, 25_005_667, 18), (53, 25_772_333, 18), (54, 26_539_000, 18),
+    (55, 27_305_667, 19), (56, 28_072_333, 19), (57, 28_839_000, 19),
+    (58, 29_639_000, 20), (59, 30_439_000, 20), (60, 31_239_000, 20),
+    (61, 32_072_333, 21), (62, 32_905_667, 21), (63, 33_739_000, 21),
+]
+
+# Lookup: day -> lifetime_total
+LIFETIME_VIEWS_BY_DAY: Dict[int, int] = {day: total for day, total, _ in VIEW_MILESTONES}
+
+# Maximum lifetime total across the table — also the upper bound of
+# ViewsGoalTarget in options.py.
+MAX_LIFETIME_VIEWS: int = VIEW_MILESTONES[-1][1]
+
+
+def _view_stage_for_quota(quota: int) -> str:
+    """Map a quota number to a coarse game_stage for AP item-classification
+    distribution purposes.  Q1 is early, Q2-3 mid, Q4+ late."""
+    if quota == 1:
+        return "early"
+    if quota <= 3:
+        return "mid"
+    return "late"
+
+
+def _day_stage_for_day(day: int) -> str:
+    """Map an extraction day to a coarse game_stage."""
+    if day <= 5:
+        return "early"
+    if day <= 10:
+        return "mid"
+    return "late"
+
+
+# Difficult monsters — duplicated from the location entries below so we can
+# resolve "is this monster difficult?" by base name when classifying tiers.
+_DIFFICULT_MONSTERS: Set[str] = {
+    "Filmed Weeping",
+    "Filmed Flicker",
+    "Filmed Cam Creep",
+    "Filmed Infiltrator",
+    "Filmed Black Hole Bot",
+    "Filmed Ear",
+    "Filmed Snail Spawner",
+    "Filmed Big Slap",
+    "Filmed Ultra Knifo",
+}
+
+
 # ==================== LOCATION TABLE ====================
-# region key:
-#   rname.hub     — Sky Island (extractions, quotas, views, shop, hats, emotes, sponsorships)
-#   rname.dungeon — The Old World (monster / artifact filming)
 location_table: Dict[str, CWLocationData] = {
 
     # ==================== BASIC EXTRACTION & DAY CHECKS ====================
     lname.any_extraction: CWLocationData(rname.dungeon, 0, "Extractions", "early"),
+}
 
-    lname.extracted_footage_prefix + "1":  CWLocationData(rname.hub,  1, "Days", "early"),
-    lname.extracted_footage_prefix + "2":  CWLocationData(rname.hub,  2, "Days", "early"),
-    lname.extracted_footage_prefix + "3":  CWLocationData(rname.hub,  3, "Days", "early"),
-    lname.extracted_footage_prefix + "4":  CWLocationData(rname.hub,  4, "Days", "early"),
-    lname.extracted_footage_prefix + "5":  CWLocationData(rname.hub,  5, "Days", "early"),
-    lname.extracted_footage_prefix + "6":  CWLocationData(rname.hub,  6, "Days", "mid"),
-    lname.extracted_footage_prefix + "7":  CWLocationData(rname.hub,  7, "Days", "mid"),
-    lname.extracted_footage_prefix + "8":  CWLocationData(rname.hub,  8, "Days", "mid"),
-    lname.extracted_footage_prefix + "9":  CWLocationData(rname.hub,  9, "Days", "mid"),
-    lname.extracted_footage_prefix + "10": CWLocationData(rname.hub, 10, "Days", "mid"),
-    lname.extracted_footage_prefix + "11": CWLocationData(rname.hub, 11, "Days", "late"),
-    lname.extracted_footage_prefix + "12": CWLocationData(rname.hub, 12, "Days", "late"),
-    lname.extracted_footage_prefix + "13": CWLocationData(rname.hub, 13, "Days", "late"),
-    lname.extracted_footage_prefix + "14": CWLocationData(rname.hub, 14, "Days", "late"),
-    lname.extracted_footage_prefix + "15": CWLocationData(rname.hub, 15, "Days", "late"),
+# Day extractions: 1..63 at offsets 1..63.  create_regions filters to
+# QuotaCount * 3 per generation.
+for _d in range(1, 64):
+    location_table[lname.extracted_footage_prefix + str(_d)] = CWLocationData(
+        rname.hub, _d, "Days", _day_stage_for_day(_d)
+    )
 
-    # ==================== QUOTA CHECKS ====================
-    # Up to 10 quotas; __init__.py only creates locations up to the configured quota count.
-    lname.met_quota_prefix + "1":  CWLocationData(rname.hub, 100, "Quotas", "early"),
-    lname.met_quota_prefix + "2":  CWLocationData(rname.hub, 101, "Quotas", "early"),
-    lname.met_quota_prefix + "3":  CWLocationData(rname.hub, 102, "Quotas", "mid"),
-    lname.met_quota_prefix + "4":  CWLocationData(rname.hub, 103, "Quotas", "mid"),
-    lname.met_quota_prefix + "5":  CWLocationData(rname.hub, 104, "Quotas", "late"),
-    lname.met_quota_prefix + "6":  CWLocationData(rname.hub, 105, "Quotas", "late"),
-    lname.met_quota_prefix + "7":  CWLocationData(rname.hub, 106, "Quotas", "late"),
-    lname.met_quota_prefix + "8":  CWLocationData(rname.hub, 107, "Quotas", "late"),
-    lname.met_quota_prefix + "9":  CWLocationData(rname.hub, 108, "Quotas", "late"),
-    lname.met_quota_prefix + "10": CWLocationData(rname.hub, 109, "Quotas", "late"),
+# ==================== QUOTA CHECKS ====================
+# Up to 21 quotas; create_regions only creates locations up to QuotaCount.
+for _q in range(1, 22):
+    _stage = "early" if _q <= 2 else "mid" if _q <= 4 else "late"
+    location_table[lname.met_quota_prefix + str(_q)] = CWLocationData(
+        rname.hub, 99 + _q, "Quotas", _stage
+    )
 
-    # ==================== VIEW MILESTONES ====================
-    lname.reached_1k:   CWLocationData(rname.hub, 200, "Views", "early"),
-    lname.reached_2k:   CWLocationData(rname.hub, 201, "Views", "early"),
-    lname.reached_3k:   CWLocationData(rname.hub, 202, "Views", "early"),
-    lname.reached_13k:  CWLocationData(rname.hub, 203, "Views", "early"),
-    lname.reached_26k:  CWLocationData(rname.hub, 204, "Views", "early"),
-    lname.reached_39k:  CWLocationData(rname.hub, 205, "Views", "mid"),
-    lname.reached_43k:  CWLocationData(rname.hub, 206, "Views", "mid"),
-    lname.reached_85k:  CWLocationData(rname.hub, 207, "Views", "mid"),
-    lname.reached_128k: CWLocationData(rname.hub, 208, "Views", "mid"),
-    lname.reached_150k: CWLocationData(rname.hub, 209, "Views", "late"),
-    lname.reached_220k: CWLocationData(rname.hub, 210, "Views", "late"),
-    lname.reached_325k: CWLocationData(rname.hub, 211, "Views", "late"),
-    lname.reached_375k: CWLocationData(rname.hub, 212, "Views", "late"),
-    lname.reached_430k: CWLocationData(rname.hub, 213, "Views", "late"),
-    lname.reached_645k: CWLocationData(rname.hub, 214, "Views", "late"),
-    lname.reached_850k: CWLocationData(rname.hub, 215, "Views", "late"),
-    lname.reached_1m:   CWLocationData(rname.hub, 216, "Views", "late"),
+# ==================== VIEW MILESTONES ====================
+# Generated from VIEW_MILESTONES.  Offsets 200..262 (one per day).
+for _day, _total, _quota in VIEW_MILESTONES:
+    location_table[lname.reached_total_views(_total)] = CWLocationData(
+        rname.hub, 199 + _day, "Views", _view_stage_for_quota(_quota)
+    )
 
-    # ==================== MONSTER FILMING CHECKS ====================
+# ==================== MONSTER FILMING CHECKS ====================
+location_table.update({
     # Early game monsters
     "Filmed Slurper":       CWLocationData(rname.dungeon, 300, "Monsters", "early"),
     "Filmed Zombe":         CWLocationData(rname.dungeon, 301, "Monsters", "early"),
@@ -95,10 +138,10 @@ location_table: Dict[str, CWLocationData] = {
     "Filmed Mouthe":        CWLocationData(rname.dungeon, 303, "Monsters", "mid"),
     "Filmed Spider":        CWLocationData(rname.dungeon, 312, "Monsters", "mid"),
     "Filmed Bomber":        CWLocationData(rname.dungeon, 316, "Monsters", "mid"),
-    "Filmed Dog":           CWLocationData(rname.dungeon, 317, "Monsters", "mid"),  # Robot Dog
+    "Filmed Dog":           CWLocationData(rname.dungeon, 317, "Monsters", "mid"),
     "Filmed Eye Guy":       CWLocationData(rname.dungeon, 318, "Monsters", "mid"),
     "Filmed Knifo":         CWLocationData(rname.dungeon, 320, "Monsters", "mid"),
-    "Filmed Larva":         CWLocationData(rname.dungeon, 321, "Monsters", "mid"),  # was Grabber Snake
+    "Filmed Larva":         CWLocationData(rname.dungeon, 321, "Monsters", "mid"),
     "Filmed Harpooner":     CWLocationData(rname.dungeon, 323, "Monsters", "mid"),
     "Filmed Barnacle Ball": CWLocationData(rname.dungeon, 325, "Monsters", "mid"),
 
@@ -109,9 +152,9 @@ location_table: Dict[str, CWLocationData] = {
     "Filmed Mime":          CWLocationData(rname.dungeon, 324, "Monsters", "late"),
     "Filmed Streamer":      CWLocationData(rname.dungeon, 328, "Monsters", "late"),
 
-    # Difficult monsters — filler by default; DifficultMonsters option can enable real items
-    # Weeping is also multiplayer-only (see rules.py and MultiplayerMode option).
-    "Filmed Weeping":       CWLocationData(rname.dungeon, 315, "Monsters", "difficult"),  # Iron Maiden / Wheeping
+    # Difficult monsters — filler by default; DifficultMonsters option enables real items
+    # Weeping is also multiplayer-only (see __init__.py / rules.py).
+    "Filmed Weeping":       CWLocationData(rname.dungeon, 315, "Monsters", "difficult"),
     "Filmed Flicker":       CWLocationData(rname.dungeon, 304, "Monsters", "difficult"),
     "Filmed Cam Creep":     CWLocationData(rname.dungeon, 305, "Monsters", "difficult"),
     "Filmed Infiltrator":   CWLocationData(rname.dungeon, 306, "Monsters", "difficult"),
@@ -122,14 +165,7 @@ location_table: Dict[str, CWLocationData] = {
     "Filmed Ultra Knifo":   CWLocationData(rname.dungeon, 329, "Monsters", "difficult"),
 
     # ==================== TIERED MONSTER FILMING (optional) ====================
-    # Enabled by the MonsterTiers option.
-    # Tier 1 = base checks above (unchanged).
-    # Tier 2 preserves the base monster's game_stage so dungeon-depth rules apply
-    # automatically from the existing stage loop in rules.py.
-    # Tier 3 uses "late" stage — requires best exploration capability for any monster.
-    # Does not include difficult monsters (Flicker, Cam Creep, etc., Weeping).
-    # Worm tiers are included here but are still subject to the MultiplhayerMode rule
-    # applied to the base "Filmed Worm" location in rules.py.
+    # Tier 2 / Tier 3 — only created when MonsterTiers is on.
 
     # ── Tier 2 (offsets 330–350) ─────────────────────────────────────────────
     "Filmed Slurper 2":         CWLocationData(rname.dungeon, 330, "Monster Tiers", "early"),
@@ -154,7 +190,7 @@ location_table: Dict[str, CWLocationData] = {
     "Filmed Mime 2":            CWLocationData(rname.dungeon, 349, "Monster Tiers", "late"),
     "Filmed Streamer 2":        CWLocationData(rname.dungeon, 350, "Monster Tiers", "late"),
 
-    # ── Tier 3 (offsets 351–371) — all "late" stage ───────────────────────────
+    # ── Tier 3 (offsets 351–371) ─────────────────────────────────────────────
     "Filmed Slurper 3":         CWLocationData(rname.dungeon, 351, "Monster Tiers", "late"),
     "Filmed Zombe 3":           CWLocationData(rname.dungeon, 352, "Monster Tiers", "late"),
     "Filmed Button Robot 3":    CWLocationData(rname.dungeon, 353, "Monster Tiers", "late"),
@@ -198,10 +234,7 @@ location_table: Dict[str, CWLocationData] = {
     "Filmed Reporter Mic":  CWLocationData(rname.dungeon, 412, "Artifacts", "early"),
 
     # ==================== ARTIFACT FILMING TIERS (optional) ====================
-    # Enabled by the MonsterTiers option (same gate as monster tiers).
-    # Tier 2 preserves the base artifact's game_stage for non-filler artifacts;
-    # filler artifacts remain "filler" for all tiers.
-    # Tier 3 uses "late" for non-filler artifacts.
+    # Same gate as monster tiers (MonsterTiers option).
 
     # ── Artifact Tier 2 (offsets 413–425) ────────────────────────────────────
     "Filmed Ribcage 2":               CWLocationData(rname.dungeon, 413, "Monster Tiers", "early"),
@@ -288,7 +321,7 @@ location_table: Dict[str, CWLocationData] = {
     "Bought Homburg":       CWLocationData(rname.hub, 606, "Hats", "early"),
     "Bought Bowler Hat":    CWLocationData(rname.hub, 608, "Hats", "early"),
     "Bought Cap":           CWLocationData(rname.hub, 609, "Hats", "early"),
-    "Bought News Cap":      CWLocationData(rname.hub, 620, "Hats", "early"),  # Newsboy Cap
+    "Bought News Cap":      CWLocationData(rname.hub, 620, "Hats", "early"),
     "Bought Sports Helmet": CWLocationData(rname.hub, 622, "Hats", "early"),
     "Bought Hard Hat":      CWLocationData(rname.hub, 629, "Hats", "early"),
 
@@ -318,21 +351,25 @@ location_table: Dict[str, CWLocationData] = {
     "Bought Witch Hat":     CWLocationData(rname.hub, 628, "Hats", "late"),
     "Bought Savannah Hair": CWLocationData(rname.hub, 630, "Hats", "late"),
 
-    # ==================== SPONSORSHIP CHECKS ====================
-    # 3 checks for accepting sponsorships (base, always in pool)
-    lname.accepted_sponsorship_prefix + "1": CWLocationData(rname.hub, 700, "Sponsorships", "mid"),
-    lname.accepted_sponsorship_prefix + "2": CWLocationData(rname.hub, 701, "Sponsorships", "mid"),
-    lname.accepted_sponsorship_prefix + "3": CWLocationData(rname.hub, 702, "Sponsorships", "late"),
-
-    # Completion checks — only active when Sponsorsanity option is enabled
-    lname.completed_sponsorship_prefix + "Easy":      CWLocationData(rname.hub, 703, "Sponsorsanity", "mid"),
-    lname.completed_sponsorship_prefix + "Medium":    CWLocationData(rname.hub, 704, "Sponsorsanity", "mid"),
-    lname.completed_sponsorship_prefix + "Hard":      CWLocationData(rname.hub, 705, "Sponsorsanity", "late"),
-    lname.completed_sponsorship_prefix + "Very Hard": CWLocationData(rname.hub, 706, "Sponsorsanity", "late"),
+    # ==================== VIRAL SENSATION (client event) ====================
+    # Fired by the client when the player crosses 1,000,000 views in a single
+    # quota.  Created in the world only when the viral_sensation goal is on.
+    lname.viral_sensation_achieved: CWLocationData(rname.hub, 800, "Viral Sensation", "late"),
 
     # ==================== VICTORY (EVENT) ====================
     lname.victory: CWLocationData(rname.hub, None, "Event", "late"),
-}
+})
+
+# ==================== SPONSORSHIP CHECKS ====================
+# Up to 20 sponsorship completion checks; create_regions activates only
+# QuotaCount - 1 of them (capped at 20).  Trigger is per-completion mod-side
+# (issue #5 Q3).  Persisted across runs by the mod so failed runs don't
+# reset the counter.
+for _s in range(1, 21):
+    _stage = "mid" if _s <= 4 else "late"
+    location_table[lname.completed_sponsorship_prefix + str(_s)] = CWLocationData(
+        rname.hub, 699 + _s, "Sponsorships", _stage
+    )
 
 # ==================== COMPUTED LOOKUPS ====================
 location_name_to_id: Dict[str, Optional[int]] = {}
@@ -354,10 +391,10 @@ location_total: int = sum(
 # ==================== LOCATION NAME GROUPS ====================
 location_name_groups: Dict[str, Set[str]] = {
     "Days": {
-        lname.extracted_footage_prefix + str(i) for i in range(1, 16)
+        lname.extracted_footage_prefix + str(i) for i in range(1, 64)
     },
     "Quotas": {
-        lname.met_quota_prefix + str(i) for i in range(1, 11)
+        lname.met_quota_prefix + str(i) for i in range(1, 22)
     },
     "Views": {
         name for name in location_table if location_table[name].location_group == "Views"
@@ -383,10 +420,10 @@ location_name_groups: Dict[str, Set[str]] = {
     "Sponsorships": {
         name for name in location_table if location_table[name].location_group == "Sponsorships"
     },
-    "Sponsorsanity": {
-        name for name in location_table if location_table[name].location_group == "Sponsorsanity"
-    },
     "Extractions": {
         name for name in location_table if location_table[name].location_group == "Extractions"
+    },
+    "Viral Sensation": {
+        name for name in location_table if location_table[name].location_group == "Viral Sensation"
     },
 }

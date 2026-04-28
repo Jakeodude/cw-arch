@@ -47,7 +47,8 @@ When adding or renaming items/locations here, **the matching change must land in
 |----------|----------|---------|
 | `98765000` | `items.py` (base ID) | Base offset for all item IDs |
 | `MONEY_FILLER_POOL` | `items.py` | Standard money filler denominations |
-| `_HIGH_VIEW_MILESTONES` | `__init__.py` | View thresholds that get filler when quotas are low |
+| `VIEW_MILESTONES` | `locations.py` | (day, lifetime_total, quota) per-day view milestones — source of truth for view checks |
+| `_DIFFICULT_MONSTERS` | `locations.py` | Monsters whose tier 2/3 are always filler regardless of toggles |
 | `_MULTIPLAYER_ONLY_MONSTERS` | `__init__.py` | Monsters that require multiple players (e.g., Weeping) |
 
 ## Common tasks
