@@ -14,7 +14,8 @@ diving_bell_charger = "Diving Bell Charger"      # charges items while inside di
 prog_views       = "Progressive Views"    # 10 copies: each multiplies video views by 1.1x
 
 # ---- Money ($) — filler ----
-# Common: $100, $200  |  Rare: $300, $400
+# Common: $50, $100, $200  |  Rare: $400
+money_50 = "$50"
 money_100 = "$100"
 money_200 = "$200"
 money_300 = "$300"

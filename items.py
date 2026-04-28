@@ -47,8 +47,9 @@ item_table: Dict[str, CWItemData] = {
     iname.prog_views: CWItemData(ItemClassification.progression, 12, 4, "Views"),
 
     # ---- Money — filler ----
-    # Common: $100, $200  |  Rare: $300, $400
+    # Common: $50, $100, $200  |  Rare: $400
     # Base quantity is 0 — money is generated entirely via weighted random filler.
+    iname.money_50:  CWItemData(ItemClassification.filler, 0, 19, "Money"),
     iname.money_100: CWItemData(ItemClassification.filler, 0, 20, "Money"),
     iname.money_200: CWItemData(ItemClassification.filler, 0, 21, "Money"),
     iname.money_300: CWItemData(ItemClassification.filler, 0, 22, "Money"),
@@ -119,12 +120,12 @@ item_name_groups: Dict[str, Set[str]] = {
 # Weighted filler pools
 # ---------------------------------------------------------------------------
 
-# Money — common ($100/$200) appear 3× as often as rare ($300/$400).
+# Money — common ($50/$100/$200) appear 3× as often as rare ($400).
 # Using a flat population list so self.random.choice() gives natural weights.
 MONEY_FILLER_POOL: List[str] = (
+    [iname.money_50]  * 3 +
     [iname.money_100] * 3 +
     [iname.money_200] * 3 +
-    [iname.money_300] * 1 +
     [iname.money_400] * 1
 )
 

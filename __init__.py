@@ -204,8 +204,28 @@ class ContentWarningWorld(World):
         named_total: int = sum(items_to_create.values())
         total_filler = max(0, self.location_total - named_total)
 
+        # Generate minimum money thresholds to ensure baseline economy.
+        # Early: 10×$100 = $1,000
+        for _ in range(10):
+            cw_items.append(self.create_item(iname.money_100))
+        # Mid: 5×$100 + 5×$200 = $1,500
+        for _ in range(5):
+            cw_items.append(self.create_item(iname.money_100))
+        for _ in range(5):
+            cw_items.append(self.create_item(iname.money_200))
+        # Late: 5×$100 + 5×$200 + 5×$400 = $3,500
+        for _ in range(5):
+            cw_items.append(self.create_item(iname.money_100))
+        for _ in range(5):
+            cw_items.append(self.create_item(iname.money_200))
+        for _ in range(5):
+            cw_items.append(self.create_item(iname.money_400))
+
+        # Subtract the 25 minimum money items from filler count.
+        total_filler -= 25
+
         # Remaining slots are filled with weighted money filler.
-        # Common: $100 / $200 (3× weight each); Rare: $300 / $400 (1× each).
+        # Common: $50 / $100 / $200 (3× weight each); Rare: $400 (1× each).
         for _ in range(total_filler):
             cw_items.append(self.create_item(self.random.choice(MONEY_FILLER_POOL)))
 
