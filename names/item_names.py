@@ -10,6 +10,10 @@ prog_oxygen      = "Progressive Oxygen"   # 4 copies: 500→700→900→1100→1
 diving_bell_o2      = "Diving Bell O2 Refill"   # refills oxygen while inside diving bell
 diving_bell_charger = "Diving Bell Charger"      # charges items while inside diving bell
 
+# ---- Progressive Stamina ----
+prog_stamina       = "Progressive Stamina"        # 4 copies: maxStamina = 100 + 25 × level
+prog_stamina_regen = "Progressive Stamina Regen"  # 2 copies: regen rate = base × (1 + 0.5 × level)
+
 # ---- Progressive Views ----
 prog_views       = "Progressive Views"    # 10 copies: each multiplies video views by 1.1x
 
