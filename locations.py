@@ -213,6 +213,31 @@ location_table.update({
     "Filmed Mime 3":            CWLocationData(rname.dungeon, 370, "Monster Tiers", "late"),
     "Filmed Streamer 3":        CWLocationData(rname.dungeon, 371, "Monster Tiers", "late"),
 
+    # ── Difficult Tier 2 (offsets 372–380) ───────────────────────────────────
+    # Always filler-only regardless of DifficultMonsters / FillerMultiSightings
+    # (issue #4 F + #5 Q1).  Excluded in __init__.py via the _DIFFICULT_MONSTERS
+    # lookup; "difficult" stage also gates them behind late-dungeon access.
+    "Filmed Weeping 2":         CWLocationData(rname.dungeon, 372, "Monster Tiers", "difficult"),
+    "Filmed Flicker 2":         CWLocationData(rname.dungeon, 373, "Monster Tiers", "difficult"),
+    "Filmed Cam Creep 2":       CWLocationData(rname.dungeon, 374, "Monster Tiers", "difficult"),
+    "Filmed Infiltrator 2":     CWLocationData(rname.dungeon, 375, "Monster Tiers", "difficult"),
+    "Filmed Black Hole Bot 2":  CWLocationData(rname.dungeon, 376, "Monster Tiers", "difficult"),
+    "Filmed Ear 2":             CWLocationData(rname.dungeon, 377, "Monster Tiers", "difficult"),
+    "Filmed Snail Spawner 2":   CWLocationData(rname.dungeon, 378, "Monster Tiers", "difficult"),
+    "Filmed Big Slap 2":        CWLocationData(rname.dungeon, 379, "Monster Tiers", "difficult"),
+    "Filmed Ultra Knifo 2":     CWLocationData(rname.dungeon, 380, "Monster Tiers", "difficult"),
+
+    # ── Difficult Tier 3 (offsets 381–389) ───────────────────────────────────
+    "Filmed Weeping 3":         CWLocationData(rname.dungeon, 381, "Monster Tiers", "difficult"),
+    "Filmed Flicker 3":         CWLocationData(rname.dungeon, 382, "Monster Tiers", "difficult"),
+    "Filmed Cam Creep 3":       CWLocationData(rname.dungeon, 383, "Monster Tiers", "difficult"),
+    "Filmed Infiltrator 3":     CWLocationData(rname.dungeon, 384, "Monster Tiers", "difficult"),
+    "Filmed Black Hole Bot 3":  CWLocationData(rname.dungeon, 385, "Monster Tiers", "difficult"),
+    "Filmed Ear 3":             CWLocationData(rname.dungeon, 386, "Monster Tiers", "difficult"),
+    "Filmed Snail Spawner 3":   CWLocationData(rname.dungeon, 387, "Monster Tiers", "difficult"),
+    "Filmed Big Slap 3":        CWLocationData(rname.dungeon, 388, "Monster Tiers", "difficult"),
+    "Filmed Ultra Knifo 3":     CWLocationData(rname.dungeon, 389, "Monster Tiers", "difficult"),
+
     # ==================== ARTIFACT FILMING CHECKS ====================
     # Early / mid game artifacts
     "Filmed Ribcage":       CWLocationData(rname.dungeon, 400, "Artifacts", "early"),
