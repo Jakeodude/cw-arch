@@ -1,11 +1,15 @@
 # worlds/content_warning/rules.py
 
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Dict, List
 from worlds.generic.Rules import add_rule
 
 from .names import location_names as lname
 from .names import region_names as rname
-from .locations import location_table
+from .locations import (
+    location_table,
+    VIEW_MILESTONES,
+    MAX_LIFETIME_VIEWS,
+)
 from . import logic
 
 if TYPE_CHECKING:
@@ -13,50 +17,46 @@ if TYPE_CHECKING:
 
 
 # ---------------------------------------------------------------------------
-# View milestone order and Progressive Views thresholds
+# View milestone access thresholds
 # ---------------------------------------------------------------------------
-_VIEW_MILESTONE_ORDER: List[Tuple[int, str]] = [
-    (1_000,   lname.reached_1k),
-    (2_000,   lname.reached_2k),
-    (3_000,   lname.reached_3k),
-    (13_000,  lname.reached_13k),
-    (26_000,  lname.reached_26k),
-    (39_000,  lname.reached_39k),
-    (43_000,  lname.reached_43k),
-    (85_000,  lname.reached_85k),
-    (128_000, lname.reached_128k),
-    (150_000, lname.reached_150k),
-    (220_000, lname.reached_220k),
-    (325_000, lname.reached_325k),
-    (375_000, lname.reached_375k),
-    (430_000, lname.reached_430k),
-    (645_000, lname.reached_645k),
-    (850_000, lname.reached_850k),
-    (1_000_000, lname.reached_1m),
-]
+# Total Progressive Views items in the pool — anchors the upper bound of the
+# threshold curve below.  Must match items.py.
+_TOTAL_PROG_VIEWS: int = 12
 
-# How many Progressive Views items are required before each higher milestone
-# is considered logically reachable (lower milestones need none).
-_VIEW_THRESHOLDS = {
-    lname.reached_85k:  2,
-    lname.reached_128k: 3,
-    lname.reached_150k: 4,
-    lname.reached_220k: 5,
-    lname.reached_325k: 6,
-    lname.reached_375k: 7,
-    lname.reached_430k: 8,
-    lname.reached_645k: 10,
-    lname.reached_850k: 11,
-    lname.reached_1m:   12,
+# Quotas at which the threshold ramp starts (inclusive lower bound) and ends
+# (where it caps at _TOTAL_PROG_VIEWS).  Q1–Q3 are sphere-1 accessible
+# (natural game progression); the ramp runs Q4..Q21.
+_THRESHOLD_RAMP_START_QUOTA: int = 3
+_THRESHOLD_RAMP_QUOTAS:      int = 21 - _THRESHOLD_RAMP_START_QUOTA  # 18
+
+
+def _threshold_for_quota(quota: int) -> int:
+    """Progressive Views items required to access a milestone whose lifetime
+    total falls inside the given quota.
+
+    Linear ramp from 0 at Q3 to _TOTAL_PROG_VIEWS at Q21, spread across the
+    intervening 18 quotas.  Q1-Q3 always return 0 (sphere-1 access)."""
+    n = quota - _THRESHOLD_RAMP_START_QUOTA
+    if n <= 0:
+        return 0
+    return min(_TOTAL_PROG_VIEWS, n * _TOTAL_PROG_VIEWS // _THRESHOLD_RAMP_QUOTAS)
+
+
+# Pre-computed: location_name -> required Progressive Views threshold.
+_VIEW_THRESHOLDS: Dict[str, int] = {
+    lname.reached_total_views(total): _threshold_for_quota(quota)
+    for _, total, quota in VIEW_MILESTONES
 }
 
 
 def _get_views_goal_milestone(target: int) -> str:
-    """Return the location name of the nearest view milestone at or above target."""
-    for views, loc_name in _VIEW_MILESTONE_ORDER:
-        if views >= target:
-            return loc_name
-    return lname.reached_1m  # fallback
+    """Return the location name of the nearest lifetime-views milestone
+    at or above target.  If target exceeds the table, returns the top
+    milestone."""
+    for _, total, _ in VIEW_MILESTONES:
+        if total >= target:
+            return lname.reached_total_views(total)
+    return lname.reached_total_views(MAX_LIFETIME_VIEWS)
 
 
 # ---------------------------------------------------------------------------
@@ -67,8 +67,6 @@ def set_region_rules(world: "ContentWarningWorld") -> None:
     """Set entrance access rules between regions."""
     multiworld = world.multiworld
     player = world.player
-
-    # Sky Island is always accessible from Menu — no rule needed.
 
     # The Old World requires a Progressive Camera to enter.
     multiworld.get_entrance(
@@ -88,66 +86,59 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
 
     quota_on    = bool(options.quota_requirement.value)
     quota_count = options.quota_count.value
+    views_checks_on = bool(options.views_checks.value)
+    viral_on    = bool(options.viral_sensation.value)
+    multiplayer_on = bool(options.multiplayer_mode.value)
 
     # -----------------------------------------------------------------------
-    # Completion condition
+    # Completion condition (stacked goals — AND semantics).
+    # Every enabled goal toggle adds an independent rule to victory_loc.
     # -----------------------------------------------------------------------
     multiworld.completion_condition[player] = lambda state: state.has(
         lname.victory, player
     )
     victory_loc = multiworld.get_location(lname.victory, player)
 
-    # -----------------------------------------------------------------------
-    # Primary Goal rules (all selected goals must be satisfied)
-    # -----------------------------------------------------------------------
-    goal = options.goal.value  # frozenset of selected goal strings
+    # ---- Viral Sensation goal ----
+    # Goal is satisfied when the client-emitted "Viral Sensation Achieved"
+    # event location can be reached.  Access to that location is gated below
+    # on the full Progressive Views item count.
+    if viral_on:
+        add_rule(
+            victory_loc,
+            lambda state: state.can_reach_location(lname.viral_sensation_achieved, player),
+        )
 
-    if "viral_sensation" in goal:
-        # Reach the 1,000,000 view milestone.
-        add_rule(victory_loc, lambda state: logic.has_views(state, player, 12))
-
-    if "views_goal" in goal:
-        # Reach the nearest milestone at or above the configured target.
-        milestone = _get_views_goal_milestone(options.views_goal_target.value)
-        threshold = _VIEW_THRESHOLDS.get(milestone, 0)
-        if threshold:
-            add_rule(
-                victory_loc,
-                lambda state, t=threshold: logic.has_views(state, player, t),
-            )
+    # ---- Views Goal ----
+    # Requires Views Checks to be on (otherwise the milestone location does
+    # not exist in the world and the rule is unsatisfiable).  Silently
+    # treated as off when views_checks is off.
+    if options.views_goal.value and views_checks_on:
+        milestone = _get_views_goal_milestone(int(options.views_goal_target.value))
         add_rule(
             victory_loc,
             lambda state, m=milestone: state.can_reach_location(m, player),
         )
 
-    if "quota_goal" in goal:
-        # Must reach and complete quota N (requires Quota Requirement on).
-        if quota_on and quota_count >= 1:
-            nth_quota = lname.met_quota_prefix + str(quota_count)
-            add_rule(
-                victory_loc,
-                lambda state, q=nth_quota: state.can_reach_location(q, player),
-            )
-        else:
-            # Quota disabled — require viral sensation as fallback
-            add_rule(victory_loc, lambda state: logic.has_views(state, player, 12))
+    # ---- Quota Goal ----
+    # Requires Quota Requirement to be on; silently off otherwise.
+    if options.quota_goal.value and quota_on and quota_count >= 1:
+        nth_quota = lname.met_quota_prefix + str(quota_count)
+        add_rule(
+            victory_loc,
+            lambda state, q=nth_quota: state.can_reach_location(q, player),
+        )
 
-    if "monster_hunter" in goal:
+    # ---- Monster Hunter goal ----
+    if options.monster_hunter.value:
         count = options.monster_hunter_count.value
-        # Build the reachable monster list filtered by the current option set:
-        #   • Multiplayer-only monsters (Weeping) are excluded in solo seeds.
-        #   • Difficult monsters are excluded unless DifficultMonsters is enabled.
-        # This prevents a FillError when monster_hunter_count exceeds the actual
-        # number of reachable locations (e.g., solo seed with count=21+).
-        _mp_only_monsters = {"Filmed Weeping"}
+        _mp_only = {"Filmed Weeping"}
         monster_locs: List[str] = [
             n for n, d in location_table.items()
             if d.location_group == "Monsters"
-            and not (n in _mp_only_monsters and not options.multiplayer_mode.value)
+            and not (n in _mp_only and not multiplayer_on)
             and not (d.game_stage == "difficult" and not options.difficult_monsters.value)
         ]
-        # Clamp to what is actually available — generate_early also clamps the option
-        # value itself, but this guard makes the rule self-consistent regardless.
         effective_count = min(count, len(monster_locs))
         add_rule(
             victory_loc,
@@ -155,9 +146,9 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
                 logic.count_reachable(state, player, locs) >= c,
         )
 
-    # hat_collector is skipped when Include Hat Purchases is disabled,
-    # since no hat locations exist in the pool.
-    if "hat_collector" in goal and options.include_hats.value:
+    # ---- Hat Collector goal ----
+    # Hats are now always in the pool (issue #5 — IncludeHats removed).
+    if options.hat_collector.value:
         count = options.hat_collector_count.value
         hat_locs: List[str] = [
             n for n, d in location_table.items()
@@ -169,31 +160,39 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
                 logic.count_reachable(state, player, locs) >= c,
         )
 
-    # item_collector is skipped when Include Emote Purchases is disabled,
-    # since emote locations are removed from the pool.
-    if "item_collector" in goal and options.include_emotes.value:
-        count = options.item_collector_count.value
-        item_locs: List[str] = [
-            n for n, d in location_table.items()
-            if d.location_group in ("Store Purchases", "Emotes")
-        ]
-        add_rule(
-            victory_loc,
-            lambda state, c=count, locs=item_locs:
-                logic.count_reachable(state, player, locs) >= c,
-        )
+    # -----------------------------------------------------------------------
+    # View milestone access rules
+    # Each milestone location's reachability is gated on Progressive Views.
+    # Only set for milestones actually present in the world.
+    # -----------------------------------------------------------------------
+    if views_checks_on:
+        for milestone_loc, threshold in _VIEW_THRESHOLDS.items():
+            try:
+                loc = multiworld.get_location(milestone_loc, player)
+            except KeyError:
+                continue  # not in this generation's pool
+            if threshold > 0:
+                add_rule(
+                    loc,
+                    lambda state, t=threshold: logic.has_views(state, player, t),
+                )
 
     # -----------------------------------------------------------------------
-    # View milestone rules
+    # Viral Sensation Achieved access rule
+    # In-game the client fires this when the player crosses 1M views in a
+    # single quota.  In AP logic we require all Progressive Views items as a
+    # conservative gate — equivalent to the previous viral_sensation rule.
     # -----------------------------------------------------------------------
-    for milestone, threshold in _VIEW_THRESHOLDS.items():
-        # Skip milestones ≥128k if quota count < 4 (only filler placed there;
-        # the item placement in __init__.py enforces the filler, but we still
-        # need to allow access so locations can be reached for the goal).
-        add_rule(
-            multiworld.get_location(milestone, player),
-            lambda state, t=threshold: logic.has_views(state, player, t),
-        )
+    if viral_on:
+        try:
+            vs_loc = multiworld.get_location(lname.viral_sensation_achieved, player)
+        except KeyError:
+            pass
+        else:
+            add_rule(
+                vs_loc,
+                lambda state: logic.has_views(state, player, _TOTAL_PROG_VIEWS),
+            )
 
     # -----------------------------------------------------------------------
     # Dungeon depth rules (mid / late stage checks)
@@ -201,45 +200,35 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
     for loc_name, loc_data in location_table.items():
         if loc_data.region != rname.dungeon:
             continue
-        # Monster Tier locations are only created when the MonsterTiers option
-        # is enabled.  Skip them here to avoid a KeyError when the option is off.
         if loc_data.location_group == "Monster Tiers" and not options.monster_tiers.value:
             continue
 
+        try:
+            loc = multiworld.get_location(loc_name, player)
+        except KeyError:
+            continue  # not in this generation's pool
+
         if loc_data.game_stage == "mid":
-            add_rule(
-                multiworld.get_location(loc_name, player),
-                lambda state: logic.can_explore_mid_dungeon(state, player),
-            )
+            add_rule(loc, lambda state: logic.can_explore_mid_dungeon(state, player))
         elif loc_data.game_stage in ("late", "difficult"):
-            add_rule(
-                multiworld.get_location(loc_name, player),
-                lambda state: logic.can_explore_late_dungeon(state, player),
-            )
+            add_rule(loc, lambda state: logic.can_explore_late_dungeon(state, player))
 
     # -----------------------------------------------------------------------
-    # Multiplayer-only monster rules
-    # "Filmed Weeping" requires Multiplayer Mode to be on.  When off, the
-    # location is not created at all (see create_regions), so no rule is
-    # needed here for solo seeds.  The no-op rule added when multiplayer is
-    # on is a semantic marker only.
+    # Multiplayer-only monster rules (semantic marker; locations are skipped
+    # entirely in solo seeds).
     # -----------------------------------------------------------------------
-    _MULTIPLAYER_ONLY: set = {"Filmed Weeping"}
-    multiplayer_on = bool(options.multiplayer_mode.value)
-
     if multiplayer_on:
-        for mp_loc in _MULTIPLAYER_ONLY:
+        for mp_loc in {"Filmed Weeping"}:
             try:
                 add_rule(
                     multiworld.get_location(mp_loc, player),
                     lambda state: True,
                 )
             except KeyError:
-                pass  # location not present in this generation — skip
+                pass
 
     # -----------------------------------------------------------------------
-    # Quota rules: each quota N requires quota N-1 to be reachable.
-    # Only create rules for quotas that are actually in the pool.
+    # Quota chain rules: each quota N requires quota N-1 to be reachable.
     # -----------------------------------------------------------------------
     if quota_on:
         for i in range(2, quota_count + 1):
@@ -251,12 +240,37 @@ def set_location_rules(world: "ContentWarningWorld") -> None:
             )
 
     # -----------------------------------------------------------------------
-    # Day extraction rules: each day requires the previous.
+    # Day extraction chain rules: each day requires the previous, up to the
+    # active day count.
     # -----------------------------------------------------------------------
-    for i in range(2, 16):
+    active_days = min(quota_count * 3, 63)
+    for i in range(2, active_days + 1):
         prev = lname.extracted_footage_prefix + str(i - 1)
         curr = lname.extracted_footage_prefix + str(i)
+        try:
+            curr_loc = multiworld.get_location(curr, player)
+        except KeyError:
+            continue
         add_rule(
-            multiworld.get_location(curr, player),
+            curr_loc,
             lambda state, p=prev: state.can_reach_location(p, player),
         )
+
+    # -----------------------------------------------------------------------
+    # Sponsorship chain rules: each sponsorship N requires sponsorship N-1.
+    # Models the per-quota completion progression — at most one per quota,
+    # so the player must finish prior sponsorships to access the next check.
+    # -----------------------------------------------------------------------
+    if options.include_sponsorships.value:
+        active_sponsors = min(max(0, quota_count - 1), 20)
+        for i in range(2, active_sponsors + 1):
+            prev = lname.completed_sponsorship_prefix + str(i - 1)
+            curr = lname.completed_sponsorship_prefix + str(i)
+            try:
+                curr_loc = multiworld.get_location(curr, player)
+            except KeyError:
+                continue
+            add_rule(
+                curr_loc,
+                lambda state, p=prev: state.can_reach_location(p, player),
+            )
