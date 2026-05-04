@@ -21,6 +21,12 @@ def reached_total_views(total: int) -> str:
 # seed is QuotaCount - 1, capped at 20.
 completed_sponsorship_prefix = "Completed Sponsorship "   # + str(N), 1..20
 
+# ---- Found Chorby ----
+# Issue #11 (mod #14): one Chorby spawns per dive; pickup is intercepted and
+# fires the next sequential Found Chorby N location.  Active count per seed is
+# QuotaCount (1..21); counter persists across run loss/restart on the mod side.
+found_chorby_prefix = "Found Chorby "   # + str(N), 1..21
+
 # ---- Viral Sensation event ----
 # Client-emitted check fired when the player crosses 1,000,000 views in a
 # single quota.  Only added to the world when the viral_sensation goal is on.
