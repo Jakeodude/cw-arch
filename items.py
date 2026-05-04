@@ -46,6 +46,14 @@ item_table: Dict[str, CWItemData] = {
     # 12 copies; each multiplies view income by 1.1×
     iname.prog_views: CWItemData(ItemClassification.progression, 12, 4, "Views"),
 
+    # ---- Progressive Stamina (Useful) ----
+    # 4 copies; maxStamina = 100 + 25 × level (mod-side: ProgressionStatsPatch).
+    iname.prog_stamina: CWItemData(ItemClassification.useful, 4, 5, "Stamina"),
+
+    # ---- Progressive Stamina Regen (Useful) ----
+    # 2 copies; regen rate = base × (1 + 0.5 × level) — 150% / 200%.
+    iname.prog_stamina_regen: CWItemData(ItemClassification.useful, 2, 6, "Stamina"),
+
     # ---- Money — filler ----
     # Common: $50, $100, $200  |  Rare: $400
     # Base quantity is 0 — money is generated entirely via weighted random filler.
