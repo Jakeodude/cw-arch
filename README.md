@@ -12,21 +12,27 @@ This repository contains the Archipelago Multiworld Randomizer integration for *
 Your YAML file allows you to customize the difficulty and settings of your world.
 
 ### Victory Conditions (Goal)
-* **viral_sensation:** Reach the ultimate milestone of 1,000,000 views in one run.
+* **viral_sensation:** Reach the ultimate milestone of 1,000,000 views in one quota.
 * **views_goal:** Reach a custom amount of total views over multiple runs. 
 * **quota_goal:** Reach a set number of quotas to win.
 * **monster_hunter:** Win by filming a specific number of unique monsters.
 * **hat_collector:** Purchase a configurable number of hats.
-* **item_collector** Purchase a configurable number of store items and emotes.
 
 
 ### Check Options
-* **quota_requirement:** When enabled, completing a quota grants a randomized item.
-*  When disabled, ALL quota-related checks are removed from the pool and the 'quota_goal' Goal option becomes invalid. 
-* **include_hats / include_emotes:** Put's checks behind the items in Phil's Hat Shop and the in-game store.
-* When include_hats is disabled the 'hat_collector' goal option becomes invalid. When include-emotes is disabled the 'item_collector' goal becomes invalid.
-* **sponsorsanity:** Adds extra check locations for completing sponsorship deals.
-* **difficult_monsters:** When on, progression items can be hidden behind dangerous monster encounters (like Flicker or Big Slap).
+* **views_checks:** When enabled, lifetime-view milestone locations are part of the pool. If disabled, all view threshold locations are removed from generation and the Views Goal becomes invalid.
+* **views_goal_target:** Sets the lifetime view total required to win if the Views Goal is enabled, up to a maximum of 33,739,000 views.
+* **quota_requirement:** Includes quota checks in the location pool. If disabled, all quota-related checks are removed and the Quota Goal becomes invalid.
+* **quota_count:** Determines the number of quotas to play through, ranging from 1 to 21. This setting drives the active count of Quota, Extracted on Day X, and Sponsorship locations.
+* **monster_hunter_count:** Sets the required number of distinct monsters that must be filmed to achieve the Monster Hunter Goal, ranging from 5 to 33.
+* **monster_tiers:** Gives each non-difficult filmable monster two additional filming location checks for their 2nd and 3rd sightings. This adds up to 42 extra location checks to your world.
+* **filler_multi_sightings:** When enabled alongside Monster Tiers, all 2nd and 3rd sighting locations will only hold filler items, preventing progression items from spawning there.
+* **difficult_monsters:** Allows difficult or rare monsters (such as the Flicker, Cam Creep, Infiltrator, Black Hole Bot, Ear, Snail Spawner, Big Slap, Ultra Knifo, and Weeping) to have real, non-filler items hidden behind their base filming checks.
+* **hat_collector_count:** Sets the number of hats that must be purchased to achieve the Hat Collector Goal, ranging from 5 to 31.
+* **include_sponsorships:** Adds sponsorship checks into the location pool. Each completed sponsorship grants the next check in order, capped at 20 total based on quota count.
+* **sponsor_filler:** Forces all sponsor locations to contain only filler items, keeping progression items away from RNG-dependent sponsorships.
+* **multiplayer_mode:** Adds multiplayer-only monster locations, such as the Weeping, into the world generation pool so they can receive items. If playing solo, leave this disabled so those locations are completely omitted from generation.
+
 
 ## 🚀 How to Generate
 1. Open your `Content Warning.yaml` and set your `name`.
