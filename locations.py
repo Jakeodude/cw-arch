@@ -396,6 +396,19 @@ for _s in range(1, 21):
         rname.hub, 699 + _s, "Sponsorships", _stage
     )
 
+# ==================== FOUND CHORBY CHECKS ====================
+# Up to 21 progressive Chorby-pickup checks; create_regions activates exactly
+# QuotaCount of them.  Trigger is per-pickup mod-side (issue #11 / mod #14):
+# one Chorby spawns per dive at a randomised PatrolPoint, the pickup is
+# intercepted, and the next sequential Found Chorby N location fires.
+# Persisted across run loss/restart on the mod side so a failed run doesn't
+# reset the counter.  Stages mirror the Quotas split.
+for _c in range(1, 22):
+    _stage = "early" if _c <= 2 else "mid" if _c <= 4 else "late"
+    location_table[lname.found_chorby_prefix + str(_c)] = CWLocationData(
+        rname.dungeon, 719 + _c, "Found Chorby", _stage
+    )
+
 # ==================== COMPUTED LOOKUPS ====================
 location_name_to_id: Dict[str, Optional[int]] = {}
 
@@ -444,6 +457,9 @@ location_name_groups: Dict[str, Set[str]] = {
     },
     "Sponsorships": {
         name for name in location_table if location_table[name].location_group == "Sponsorships"
+    },
+    "Found Chorby": {
+        name for name in location_table if location_table[name].location_group == "Found Chorby"
     },
     "Extractions": {
         name for name in location_table if location_table[name].location_group == "Extractions"

@@ -154,6 +154,16 @@ class ContentWarningWorld(World):
         options = self.options
         return min(max(0, options.quota_count.value * 3), 63)
 
+    def _active_chorby_count(self) -> int:
+        """Found Chorby checks active in the current generation.  Issue #11 /
+        mod #14: the mod spawns one Chorby per dive and fires the next
+        sequential Found Chorby N on pickup.  Active count is QuotaCount
+        regardless of quota_requirement — Chorby pickups happen on dives,
+        which still run when quota is off (we only bound the world).  Capped
+        at 21."""
+        options = self.options
+        return min(max(0, options.quota_count.value), 21)
+
     def _compute_location_total(self) -> int:
         """The real number of check locations create_regions will produce."""
         options = self.options
@@ -162,6 +172,7 @@ class ContentWarningWorld(World):
         active_views = set(self._active_view_milestone_names())
         active_sponsors = self._active_sponsor_count()
         active_days = self._active_day_count()
+        active_chorbies = self._active_chorby_count()
         viral_on = bool(options.viral_sensation.value)
 
         total = 0
@@ -186,6 +197,11 @@ class ContentWarningWorld(World):
             if grp == "Quotas":
                 num = int(loc_name.replace(lname.met_quota_prefix, ""))
                 if num > quota_count:
+                    continue
+
+            if grp == "Found Chorby":
+                num = int(loc_name.replace(lname.found_chorby_prefix, ""))
+                if num > active_chorbies:
                     continue
 
             if grp == "Views":
@@ -304,6 +320,7 @@ class ContentWarningWorld(World):
         active_views = set(self._active_view_milestone_names())
         active_sponsors = self._active_sponsor_count()
         active_days = self._active_day_count()
+        active_chorbies = self._active_chorby_count()
 
         # Build set of disabled location groups.
         disabled_groups: set = set()
@@ -354,6 +371,12 @@ class ContentWarningWorld(World):
             if grp == "Sponsorships":
                 num = int(loc_name.replace(lname.completed_sponsorship_prefix, ""))
                 if num > active_sponsors:
+                    continue
+
+            # Found Chorby: 1..QuotaCount, capped at 21.
+            if grp == "Found Chorby":
+                num = int(loc_name.replace(lname.found_chorby_prefix, ""))
+                if num > active_chorbies:
                     continue
 
             # Views: only milestones <= active cap.
