@@ -154,7 +154,8 @@ class MultiplayerMode(Toggle):
 class DeathLink(Toggle):
      """Enable Death Link. When enabled, if any player in the Death Link group
      dies in their respective game, all players in that group will die.
-     Content Warning counts as dead when the entire team wipes."""
+     Content Warning counts as dead when the entire team wipes. If the team is not in the old world
+     when another player dies they will not be affected by Death Link until they return to the old world."""
      display_name = "Death Link"
 
 
