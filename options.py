@@ -142,13 +142,20 @@ class SponsorFiller(DefaultOnToggle):
 
 
 class MultiplayerMode(Toggle):
-    """Enable if this game is played in multiplayer (more than one player).
-    When enabled, multiplayer-only monster locations (Weeping) are added to
-    the world and can receive real items.
-    When disabled (default / solo play), those locations are completely
-    omitted from generation — the player would never be able to film them
-    without other players in the lobby."""
-    display_name = "Multiplayer Mode"
+     """Enable if this game is played in multiplayer (more than one player).
+     When enabled, multiplayer-only monster locations (Weeping) are added to
+     the world and can receive real items.
+     When disabled (default / solo play), those locations are completely
+     omitted from generation — the player would never be able to film them
+     without other players in the lobby."""
+     display_name = "Multiplayer Mode"
+
+
+class DeathLink(Toggle):
+     """Enable Death Link. When enabled, if any player in the Death Link group
+     dies in their respective game, all players in that group will die.
+     Content Warning counts as dead when the entire team wipes."""
+     display_name = "Death Link"
 
 
 # ===========================================================================
@@ -175,3 +182,4 @@ class ContentWarningGameOptions(PerGameCommonOptions):
     include_sponsorships:   IncludeSponsorship
     sponsor_filler:         SponsorFiller
     multiplayer_mode:       MultiplayerMode
+    death_link:             DeathLink

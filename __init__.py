@@ -467,4 +467,5 @@ class ContentWarningWorld(World):
             "monster_tiers":                bool(options.monster_tiers.value),
             "filler_multi_sightings":       bool(options.filler_multi_sightings.value),
             "multiplayer_mode":             bool(options.multiplayer_mode.value),
+            "death_link":                   bool(options.death_link.value),
         }
